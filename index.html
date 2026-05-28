@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Portfolio interactivo de repositorios públicos de L183R con estética de terminal Bash." />
+  <title>L183R | Terminal de repositorios</title>
+  <link rel="preconnect" href="https://api.github.com" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell-page">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">~/repos/publicos</p>
+      <h1 id="page-title">Terminal Bash para navegar mis repositorios</h1>
+      <p class="hero__copy">
+        Explora mis proyectos públicos desde una terminal simulada. Usa comandos como
+        <code>help</code>, <code>ls</code>, <code>cd ciberseguridad</code> o filtra rápidamente por categoría.
+      </p>
+    </section>
+
+    <section class="terminal-card" aria-label="Terminal interactiva de repositorios">
+      <div class="terminal-card__bar" aria-hidden="true">
+        <span class="dot dot--red"></span>
+        <span class="dot dot--yellow"></span>
+        <span class="dot dot--green"></span>
+        <span class="terminal-card__title">bash — L183R.github.io</span>
+      </div>
+
+      <div id="terminal-output" class="terminal-output" role="log" aria-live="polite"></div>
+
+      <form id="terminal-form" class="terminal-input" autocomplete="off">
+        <label for="terminal-command" class="prompt">L183R@github:~$</label>
+        <input
+          id="terminal-command"
+          name="command"
+          type="text"
+          spellcheck="false"
+          aria-label="Escribe un comando de terminal"
+          placeholder="help"
+        />
+      </form>
+    </section>
+
+    <section class="category-panel" aria-labelledby="category-title">
+      <div>
+        <p class="eyebrow">Filtros rápidos</p>
+        <h2 id="category-title">Categorías</h2>
+      </div>
+      <div class="category-buttons" role="list">
+        <button class="category-button" type="button" data-category="ciberseguridad">Ciberseguridad</button>
+        <button class="category-button" type="button" data-category="programacion">Programación</button>
+        <button class="category-button" type="button" data-category="ctf">CTF</button>
+        <button class="category-button" type="button" data-category="juegos">Juegos</button>
+      </div>
+    </section>
+  </main>
+
+  <template id="line-template">
+    <div class="terminal-line"></div>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
