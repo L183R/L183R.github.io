@@ -5,8 +5,34 @@ const categoryDefinitions = {
   ciberseguridad: ["security", "cyber", "pentest", "malware", "forensics", "osint", "crypto", "exploit", "hacking"],
   programacion: ["programming", "programacion", "code", "script", "api", "web", "python", "javascript", "java", "go", "rust"],
   ctf: ["ctf", "capture-the-flag", "writeup", "pwn", "reversing", "challenge", "hackthebox", "tryhackme"],
-  juegos: ["game", "games", "juego", "juegos", "unity", "godot", "pygame", "arcade"]
+  juegos: ["game", "games", "juego", "juegos", "unity", "godot", "pygame", "arcade"],
+  otros: ["misc", "otros", "tools", "utilities", "utilidades"]
 };
+
+const categoryNames = {
+  ciberseguridad: "Ciberseguridad",
+  programacion: "Programación",
+  ctf: "CTF",
+  juegos: "Juegos",
+  otros: "Otros"
+};
+
+const repoCategoryOverrides = {
+  "gestor-tickets": "otros",
+  "alien-pewpew": "juegos",
+  "password-manager": "otros",
+  "powpowercrawler": "ciberseguridad",
+  "csv_to_hash_sha256_comparator": "ciberseguridad",
+  "autoinfinitycraft": "juegos",
+  atica: "programacion"
+};
+
+const hiddenRepos = new Set([
+  "l183r.github.io",
+  "ia-test",
+  "pokemonheroes",
+  "buscador"
+]);
 
 const fallbackRepos = [
   {
@@ -38,6 +64,11 @@ function normalize(text = "") {
 }
 
 function detectCategory(repo) {
+  const normalizedName = normalize(repo.name);
+  if (repoCategoryOverrides[normalizedName]) {
+    return repoCategoryOverrides[normalizedName];
+  }
+
   const searchableText = normalize([
     repo.name,
     repo.description,
@@ -49,7 +80,11 @@ function detectCategory(repo) {
     keywords.some((keyword) => searchableText.includes(keyword))
   );
 
-  return matched ? matched[0] : "programacion";
+  return matched ? matched[0] : "otros";
+}
+
+function shouldShowRepo(repo) {
+  return !hiddenRepos.has(normalize(repo.name));
 }
 
 function formatDate(date) {
@@ -81,7 +116,7 @@ function printHelp() {
   addLine("Comandos disponibles:", "success");
   addLine("  help                         Muestra esta ayuda");
   addLine("  ls                           Lista categorías o repositorios");
-  addLine("  cd <categoria>               Entra en ciberseguridad, programacion, ctf o juegos");
+  addLine(`  cd <categoria>               Entra en ${Object.keys(categoryDefinitions).join(", ")}`);
   addLine("  cat <repo>                   Muestra detalles de un repositorio");
   addLine("  open <repo>                  Abre el repositorio en GitHub");
   addLine("  pwd                          Muestra la ruta actual");
@@ -100,7 +135,7 @@ function printCategories() {
   addLine("Categorías disponibles:", "success");
   Object.keys(categoryDefinitions).forEach((category) => {
     const count = state.repos.filter((repo) => repo.category === category).length;
-    addLine(`  ${category.padEnd(16)} ${count} repositorio(s)`);
+    addLine(`  ${category.padEnd(16)} ${count} repositorio(s) - ${categoryNames[category]}`);
   });
 }
 
@@ -132,7 +167,7 @@ function printRepoDetails(repoName) {
   }
 
   addLine(repo.name, "repo");
-  addLine(`  Categoría: ${repo.category}`);
+  addLine(`  Categoría: ${categoryNames[repo.category] || repo.category}`);
   addLine(`  Lenguaje: ${repo.language || "No especificado"}`);
   addLine(`  Actualizado: ${formatDate(repo.updated_at)}`);
   addLine(`  URL: ${repo.html_url}`);
@@ -146,7 +181,7 @@ function changeCategory(category) {
   const normalizedCategory = normalize(category);
   if (!categoryDefinitions[normalizedCategory]) {
     addLine(`Categoría desconocida: ${category}`, "error");
-    addLine("Usa: ciberseguridad, programacion, ctf o juegos", "muted");
+    addLine(`Usa: ${Object.keys(categoryDefinitions).join(", ")}`, "muted");
     return;
   }
 
@@ -233,7 +268,7 @@ async function loadRepos(showMessage = false) {
     }
     const repos = await response.json();
     state.repos = repos
-      .filter((repo) => !repo.fork)
+      .filter((repo) => !repo.fork && shouldShowRepo(repo))
       .map((repo) => ({ ...repo, category: detectCategory(repo) }));
     addLine(`${state.repos.length} repositorio(s) cargados correctamente.`, "success");
   } catch (error) {
