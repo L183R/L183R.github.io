@@ -114,9 +114,9 @@ function renderArcadeScreen() {
 
   document.body.dataset.screen = state.mode;
   arcadeStatus.textContent = isBoot ? "CREDITS 0" : "CREDITS 1";
-  screenTitle.textContent = isBoot ? "L183R" : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
+  screenTitle.textContent = isBoot ? "Mi repo" : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
   screenSubtitle.textContent = isBoot
-    ? "The Repo Warrior"
+    ? "L183R"
     : isCharacter
       ? "Clasificaciones de repos"
       : isStage
