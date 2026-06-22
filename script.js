@@ -135,7 +135,7 @@ function renderArcadeScreen() {
     : isCharacter
       ? "←/→ elige clasificación · Enter confirma · Esc vuelve"
       : isStage
-        ? "←/→ elige repo · Enter abre ficha · Esc vuelve"
+        ? "←/→ elige repo · Enter abre GitHub · Esc vuelve"
         : "Enter abre GitHub · Esc vuelve a Select Stage";
 
   if (screenCopyright) screenCopyright.hidden = !isBoot;
@@ -156,7 +156,7 @@ function renderFighterSelect() {
   const project = getCurrentProject();
   fighterStage.textContent = state.mode === "boot" ? "BOOT 1989" : state.mode === "character" ? "SELECT CHARACTER" : `${category.stage} · ${category.name}`;
   fighterTitle.textContent = state.mode === "boot" ? "Credits 0" : state.mode === "character" ? "Choose your character" : state.mode === "project" ? project.name : "Select Stage";
-  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Clasificación de los repositorios · Esc vuelve al inicio" : state.mode === "project" ? `${project.description} · Esc vuelve a Select Stage` : `${category.description} · Esc vuelve a Character Select`;
+  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Clasificación de los repositorios · Esc vuelve al inicio" : state.mode === "project" ? `${project.description} · Esc vuelve a Select Stage` : `${category.description} · Enter abre GitHub · Esc vuelve a Character Select`;
   if (menuLabel) menuLabel.textContent = state.mode === "boot" ? "Insert coin" : state.mode === "character" ? "Character select" : state.mode === "project" ? "Repo card" : "Stage select";
 
   if (state.mode === "stage") {
@@ -169,10 +169,10 @@ function renderFighterSelect() {
         </div>
         <div class="stage-select-card__middle">
           <button class="carousel-arrow carousel-arrow--prev" data-stage-direction="-1" type="button" aria-label="Stage anterior">‹</button>
-          <div class="stage-select-card__panel stage-select-card__panel--character">
+          <button class="stage-select-card__panel stage-select-card__panel--character" data-project-index="${state.currentProjectIndex}" type="button" aria-label="Abrir repo ${project.name}">
             <img src="${stageImage}" alt="Vista previa de ${project.name}" loading="lazy">
             <h3>${project.name}</h3>
-          </div>
+          </button>
           <button class="carousel-arrow carousel-arrow--next" data-stage-direction="1" type="button" aria-label="Stage siguiente">›</button>
         </div>
         <div class="stage-select-card__panel stage-select-card__panel--description">
@@ -291,8 +291,9 @@ function confirmSelection() {
   startBackgroundMusic();
   if (state.mode === "boot") state.mode = "character";
   else if (state.mode === "character") state.mode = "stage";
-  else if (state.mode === "stage") state.mode = "project";
-  else window.open(getProjectUrl(getCurrentProject().name), "_blank", "noopener,noreferrer");
+  else if (state.mode === "stage" || state.mode === "project") {
+    window.open(getProjectUrl(getCurrentProject().name), "_blank", "noopener,noreferrer");
+  }
   renderArcadeScreen();
 }
 
@@ -351,6 +352,11 @@ fighterRoster.addEventListener("click", (event) => {
     return;
   }
   state.currentProjectIndex = Number(card.dataset.projectIndex);
+  if (state.mode === "stage") {
+    window.open(getProjectUrl(getCurrentProject().name), "_blank", "noopener,noreferrer");
+    renderArcadeScreen();
+    return;
+  }
   state.mode = "project";
   renderArcadeScreen();
 });
@@ -360,6 +366,11 @@ stageMap.addEventListener("click", (event) => {
   if (!node || state.mode === "boot" || state.mode === "character") return;
   startBackgroundMusic();
   state.currentProjectIndex = Number(node.dataset.projectIndex);
+  if (state.mode === "stage") {
+    window.open(getProjectUrl(getCurrentProject().name), "_blank", "noopener,noreferrer");
+    renderArcadeScreen();
+    return;
+  }
   state.mode = "project";
   renderArcadeScreen();
 });
