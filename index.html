@@ -33,7 +33,11 @@
           <p class="eyebrow" id="menu-label">Insert coin</p>
           <h2 id="fighter-title">Credits 0</h2>
           <p id="fighter-description" class="fighter-select__description">Pulsa Enter para iniciar.</p>
-          <div id="fighter-roster" class="fighter-roster"></div>
+          <div class="character-carousel" aria-label="Selector de personajes">
+            <button class="carousel-arrow carousel-arrow--prev" id="character-prev" type="button" aria-label="Personaje anterior">‹</button>
+            <div id="fighter-roster" class="fighter-roster"></div>
+            <button class="carousel-arrow carousel-arrow--next" id="character-next" type="button" aria-label="Personaje siguiente">›</button>
+          </div>
         </div>
 
         <button class="music-button" id="music-toggle" type="button" aria-pressed="false">♫ Música</button>

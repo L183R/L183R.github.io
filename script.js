@@ -47,14 +47,14 @@ const projectCategories = {
 
 const state = {
   mode: "boot",
-  currentCategory: "ciberseguridad",
+  currentCategory: "entrenamiento",
   currentCategoryIndex: 0,
   currentProjectIndex: 0,
   musicReady: false,
   autoplayAttempted: false
 };
 
-const categoryKeys = Object.keys(projectCategories);
+const categoryKeys = ["entrenamiento", "ciberseguridad", "juegos"];
 const categoryButtons = document.querySelectorAll(".coin-button");
 const stageMap = document.querySelector("#stage-map");
 const totalCounter = document.querySelector("#total-counter");
@@ -63,6 +63,8 @@ const fighterTitle = document.querySelector("#fighter-title");
 const fighterDescription = document.querySelector("#fighter-description");
 const fighterRoster = document.querySelector("#fighter-roster");
 const musicToggle = document.querySelector("#music-toggle");
+const characterPrev = document.querySelector("#character-prev");
+const characterNext = document.querySelector("#character-next");
 const backgroundMusic = document.querySelector("#background-music");
 const arcadeStatus = document.querySelector("#arcade-status");
 const screenTitle = document.querySelector("#screen-title");
@@ -114,7 +116,7 @@ function renderArcadeScreen() {
 
   document.body.dataset.screen = state.mode;
   arcadeStatus.textContent = isBoot ? "CREDITS 0" : "CREDITS 1";
-  screenTitle.textContent = isBoot ? "Mi repo" : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
+  screenTitle.textContent = isBoot ? "Mi repo" : isCharacter ? "Choose your character" : isStage ? "Select Stage" : project.name;
   screenSubtitle.textContent = isBoot
     ? "L183R"
     : isCharacter
@@ -147,9 +149,9 @@ function renderFighterSelect() {
   const category = getCurrentCategory();
   const project = getCurrentProject();
   fighterStage.textContent = state.mode === "boot" ? "BOOT 1989" : state.mode === "character" ? "SELECT CHARACTER" : `${category.stage} · ${category.name}`;
-  fighterTitle.textContent = state.mode === "boot" ? "Credits 0" : state.mode === "character" ? "Select Character" : state.mode === "project" ? project.name : "Select Stage";
-  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Elige una clasificación para cargar sus repos." : state.mode === "project" ? project.description : category.description;
-  if (menuLabel) menuLabel.textContent = state.mode === "boot" ? "Insert coin" : state.mode === "character" ? "Class select" : state.mode === "project" ? "Repo card" : "Stage select";
+  fighterTitle.textContent = state.mode === "boot" ? "Credits 0" : state.mode === "character" ? "Choose your character" : state.mode === "project" ? project.name : "Select Stage";
+  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Entrenamiento · Ciberseguridad · Juegos" : state.mode === "project" ? project.description : category.description;
+  if (menuLabel) menuLabel.textContent = state.mode === "boot" ? "Insert coin" : state.mode === "character" ? "Character select" : state.mode === "project" ? "Repo card" : "Stage select";
 
   if (state.mode === "character") {
     fighterRoster.innerHTML = categoryKeys.map((categoryKey, index) => {
@@ -307,6 +309,18 @@ stageMap.addEventListener("click", (event) => {
   state.currentProjectIndex = Number(node.dataset.projectIndex);
   state.mode = "project";
   renderArcadeScreen();
+});
+
+characterPrev?.addEventListener("click", () => {
+  if (state.mode !== "character") return;
+  startBackgroundMusic();
+  changeCategoryByOffset(-1);
+});
+
+characterNext?.addEventListener("click", () => {
+  if (state.mode !== "character") return;
+  startBackgroundMusic();
+  changeCategoryByOffset(1);
 });
 
 musicToggle?.addEventListener("click", toggleBackgroundMusic);
