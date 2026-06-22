@@ -124,6 +124,8 @@ body::after {
   text-shadow: 2px 2px 0 #000, 0 0 10px currentColor;
 }
 
+.arcade-overlay[hidden] { display: none; }
+
 .arcade-overlay {
   display: grid;
   justify-items: center;

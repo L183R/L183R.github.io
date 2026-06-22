@@ -67,6 +67,7 @@ const characterPrev = document.querySelector("#character-prev");
 const characterNext = document.querySelector("#character-next");
 const backgroundMusic = document.querySelector("#background-music");
 const arcadeStatus = document.querySelector("#arcade-status");
+const arcadeOverlay = document.querySelector(".arcade-overlay");
 const screenTitle = document.querySelector("#screen-title");
 const screenSubtitle = document.querySelector("#screen-subtitle");
 const screenPrompt = document.querySelector("#screen-prompt");
@@ -115,6 +116,7 @@ function renderArcadeScreen() {
   const isProject = state.mode === "project";
 
   document.body.dataset.screen = state.mode;
+  if (arcadeOverlay) arcadeOverlay.hidden = isCharacter;
   arcadeStatus.textContent = isBoot ? "CREDITS 0" : "CREDITS 1";
   screenTitle.textContent = isBoot ? "Mi repo" : isCharacter ? "Choose your character" : isStage ? "Select Stage" : project.name;
   screenSubtitle.textContent = isBoot
