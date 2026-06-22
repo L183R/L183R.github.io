@@ -139,6 +139,7 @@ body::after {
 .eyebrow,
 .arcade-overlay__subtitle,
 .arcade-overlay__prompt,
+.arcade-overlay__copyright,
 .fighter-select__description { margin: 0; }
 
 .eyebrow {
@@ -170,22 +171,47 @@ h1 {
 }
 
 body[data-screen="boot"] h1 {
-  max-width: min(760px, 88%);
-  color: #ffe45c;
-  font-size: clamp(1.25rem, 4.2vw, 4.9rem);
-  line-height: 1.12;
+  max-width: min(720px, 88%);
+  color: #ff4d1f;
+  font-family: "Bangers", "Press Start 2P", Impact, fantasy;
+  font-size: clamp(4.2rem, 12vw, 10rem);
+  font-style: italic;
+  letter-spacing: 0.05em;
+  line-height: 0.78;
   overflow-wrap: anywhere;
-  text-shadow: 4px 4px 0 #2d1500, 7px 7px 0 #000, 0 0 24px #ff7ac8;
+  transform: skew(-12deg) rotate(-5deg);
+  -webkit-text-stroke: clamp(2px, 0.45vw, 7px) #ffd75e;
+  text-shadow:
+    4px 4px 0 #6b1200,
+    9px 9px 0 #000,
+    0 0 20px #ff9f2f,
+    0 0 42px #ffe45c;
 }
 
 body[data-screen="boot"] .arcade-overlay__subtitle {
-  color: #ff9f2f;
-  font-size: clamp(1.35rem, 3vw, 3.6rem);
+  color: #f5f7ff;
+  font-family: "Press Start 2P", "Courier New", ui-monospace, monospace;
+  font-size: clamp(0.68rem, 1.7vw, 1.35rem);
+  letter-spacing: 0.08em;
+  -webkit-text-stroke: 0;
+  text-shadow: 3px 3px 0 #163167, 0 0 12px #7ee7ff;
 }
 
 body[data-screen="boot"] .arcade-overlay__prompt {
-  color: #ffe45c;
-  font-size: clamp(1.15rem, 2.5vw, 2.7rem);
+  color: #ffffff;
+  font-family: "Press Start 2P", "Courier New", ui-monospace, monospace;
+  font-size: clamp(0.62rem, 1.2vw, 0.98rem);
+  -webkit-text-stroke: 0;
+  text-shadow: 3px 3px 0 #000, 0 0 12px #ffffff;
+}
+
+.arcade-overlay__copyright {
+  color: #ffd15c;
+  font-size: clamp(0.54rem, 0.95vw, 0.82rem);
+  letter-spacing: 0.05em;
+  line-height: 1.65;
+  text-shadow: 2px 2px 0 #000, 0 0 10px #ff9f2f;
+  text-transform: uppercase;
 }
 
 h2 {
@@ -323,6 +349,38 @@ h2 {
   background-size: cover;
 }
 
+body[data-screen="boot"] .crt-frame {
+  grid-template-rows: auto 1fr auto;
+  background: #050308;
+}
+
+body[data-screen="boot"] .screen-grid {
+  opacity: 1;
+}
+
+body[data-screen="boot"] .screen-grid::before {
+  background-image:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)),
+    radial-gradient(circle at center, transparent 42%, rgba(0, 0, 0, 0.66)),
+    var(--stage-image);
+  background-position: center;
+  background-size: cover;
+}
+
+body[data-screen="boot"] .arcade-overlay {
+  align-self: center;
+  border: 0;
+  padding: clamp(24px, 5vh, 56px) clamp(14px, 4vw, 48px);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+body[data-screen="boot"] .arcade-overlay .eyebrow {
+  color: #ffe45c;
+  text-shadow: 2px 2px 0 #000, 0 0 14px #ff4d1f;
+}
+
 body[data-screen="stage"] .screen-grid::before,
 body[data-screen="project"] .screen-grid::before {
   background-size: contain;
@@ -365,7 +423,8 @@ body[data-screen="project"] .screen-grid::before {
 .music-button:focus-visible,
 .music-button.is-playing { background: var(--mint); }
 
-body[data-screen="boot"] .fighter-roster { display: none; }
+body[data-screen="boot"] .fighter-select__content,
+body[data-screen="boot"] .map-node { display: none; }
 
 body[data-screen="character"] .arcade-overlay,
 body[data-screen="stage"] .arcade-overlay,
