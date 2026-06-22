@@ -1,4 +1,5 @@
 const GITHUB_USER = "L183R";
+const BACKGROUND_MUSIC = "Cuatro Sombras Verdes.mp3";
 
 const projectCategories = {
   ciberseguridad: {
@@ -34,9 +35,12 @@ const projectCategories = {
 };
 
 const state = {
-  currentCategory: "ciberseguridad"
+  currentCategory: "ciberseguridad",
+  currentCategoryIndex: 0,
+  musicReady: false
 };
 
+const categoryKeys = Object.keys(projectCategories);
 const categoryButtons = document.querySelectorAll(".coin-button");
 const stageMap = document.querySelector("#stage-map");
 const categoryGrid = document.querySelector("#category-grid");
@@ -46,6 +50,10 @@ const fighterStage = document.querySelector("#fighter-stage");
 const fighterTitle = document.querySelector("#fighter-title");
 const fighterDescription = document.querySelector("#fighter-description");
 const fighterRoster = document.querySelector("#fighter-roster");
+const musicToggle = document.querySelector("#music-toggle");
+const backgroundMusic = document.querySelector("#background-music");
+
+backgroundMusic?.setAttribute("src", BACKGROUND_MUSIC);
 
 function getTotalProjects() {
   return Object.values(projectCategories).reduce((total, category) => total + category.projects.length, 0);
@@ -64,7 +72,22 @@ function getAllProjects() {
 function setActiveCategory(categoryKey) {
   document.querySelectorAll("[data-category]").forEach((element) => {
     element.classList.toggle("is-active", element.dataset.category === categoryKey);
+    if (element.classList.contains("coin-button")) {
+      element.setAttribute("aria-pressed", String(element.dataset.category === categoryKey));
+    }
   });
+}
+
+function getCurrentProjectCards() {
+  return [...fighterRoster.querySelectorAll(".fighter-card[href]")];
+}
+
+function focusFirstProject() {
+  getCurrentProjectCards()[0]?.focus({ preventScroll: true });
+}
+
+function focusCategoryButton(categoryKey = state.currentCategory) {
+  document.querySelector(`.coin-button[data-category="${categoryKey}"]`)?.focus({ preventScroll: true });
 }
 
 function renderFighterSelect(categoryKey = state.currentCategory) {
@@ -90,10 +113,19 @@ function renderFighterSelect(categoryKey = state.currentCategory) {
     `;
 }
 
-function changeCategory(categoryKey) {
+function changeCategory(categoryKey, { focusMenu = false, scrollToFighter = false } = {}) {
   state.currentCategory = categoryKey;
+  state.currentCategoryIndex = categoryKeys.indexOf(categoryKey);
   setActiveCategory(categoryKey);
   renderFighterSelect(categoryKey);
+
+  if (focusMenu) focusCategoryButton(categoryKey);
+  if (scrollToFighter) document.querySelector(".fighter-select").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function changeCategoryByOffset(offset) {
+  const nextIndex = (state.currentCategoryIndex + offset + categoryKeys.length) % categoryKeys.length;
+  changeCategory(categoryKeys[nextIndex], { focusMenu: true, scrollToFighter: true });
 }
 
 function renderCategoryGrid() {
@@ -103,7 +135,7 @@ function renderCategoryGrid() {
       : `<li class="empty-slot">Bonus bloqueado · esperando práctica</li>`;
 
     return `
-      <article class="stage-card" data-category="${key}" style="--accent: ${category.color}">
+      <article class="stage-card" data-category="${key}" style="--accent: ${category.color}" tabindex="0" role="button" aria-label="Seleccionar ${category.name}">
         <div class="stage-card__top">
           <span class="stage-card__badge">${category.icon}</span>
           <span class="stage-card__count">${category.stage} · ${category.projects.length.toString().padStart(2, "0")}</span>
@@ -116,10 +148,19 @@ function renderCategoryGrid() {
   }).join("");
 
   categoryGrid.querySelectorAll(".stage-card").forEach((card) => {
+    const selectCard = () => {
+      startBackgroundMusic();
+      changeCategory(card.dataset.category, { scrollToFighter: true });
+    };
     card.addEventListener("click", (event) => {
       if (event.target.closest("a")) return;
-      changeCategory(card.dataset.category);
-      document.querySelector(".fighter-select").scrollIntoView({ behavior: "smooth", block: "start" });
+      selectCard();
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectCard();
+      }
     });
   });
 }
@@ -136,13 +177,78 @@ function renderStageMap() {
   }).join("");
 }
 
-categoryButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    changeCategory(button.dataset.category);
+function startBackgroundMusic() {
+  if (!backgroundMusic || !musicToggle || state.musicReady) return;
+
+  backgroundMusic.volume = 0.42;
+  backgroundMusic.play()
+    .then(() => {
+      state.musicReady = true;
+      musicToggle.classList.add("is-playing");
+      musicToggle.textContent = "♫ Música ON";
+      musicToggle.setAttribute("aria-pressed", "true");
+    })
+    .catch(() => {
+      musicToggle.textContent = "♫ Activar música";
+      musicToggle.setAttribute("aria-pressed", "false");
+    });
+}
+
+function toggleBackgroundMusic() {
+  if (!backgroundMusic || !musicToggle) return;
+
+  if (backgroundMusic.paused) {
+    startBackgroundMusic();
+    return;
+  }
+
+  backgroundMusic.pause();
+  state.musicReady = false;
+  musicToggle.classList.remove("is-playing");
+  musicToggle.textContent = "♫ Música OFF";
+  musicToggle.setAttribute("aria-pressed", "false");
+}
+
+function handleKeyboardNavigation(event) {
+  if (["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
+
+  const key = event.key.toLowerCase();
+  const movementKeys = ["arrowleft", "a", "arrowright", "d", "arrowup", "w", "arrowdown", "s"];
+  if (!movementKeys.includes(key)) return;
+
+  event.preventDefault();
+  startBackgroundMusic();
+
+  if (key === "arrowleft" || key === "a") {
+    changeCategoryByOffset(-1);
+    return;
+  }
+
+  if (key === "arrowright" || key === "d") {
+    changeCategoryByOffset(1);
+    return;
+  }
+
+  if (key === "arrowdown" || key === "s") {
     document.querySelector(".fighter-select").scrollIntoView({ behavior: "smooth", block: "start" });
+    focusFirstProject();
+    return;
+  }
+
+  document.querySelector(".stage-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  focusCategoryButton();
+}
+
+categoryButtons.forEach((button) => {
+  button.setAttribute("aria-pressed", "false");
+  button.addEventListener("click", () => {
+    startBackgroundMusic();
+    changeCategory(button.dataset.category, { scrollToFighter: true });
   });
 });
 
+musicToggle?.addEventListener("click", toggleBackgroundMusic);
+document.addEventListener("keydown", handleKeyboardNavigation);
 
 totalCounter.textContent = getTotalProjects().toString().padStart(2, "0");
 categoryCounter.textContent = Object.keys(projectCategories).length.toString().padStart(2, "0");
