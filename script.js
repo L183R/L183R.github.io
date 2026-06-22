@@ -1,52 +1,47 @@
 const GITHUB_USER = "L183R";
-const API_URL = `https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=100`;
 
-const categoryDefinitions = {
-  ciberseguridad: ["security", "cyber", "pentest", "malware", "forensics", "osint", "crypto", "exploit", "hacking"],
-  programacion: ["programming", "programacion", "code", "script", "api", "web", "python", "javascript", "java", "go", "rust"],
-  ctf: ["ctf", "capture-the-flag", "writeup", "pwn", "reversing", "challenge", "hackthebox", "tryhackme"],
-  juegos: ["game", "games", "juego", "juegos", "unity", "godot", "pygame", "arcade"],
-  otros: ["misc", "otros", "tools", "utilities", "utilidades"]
-};
-
-const categoryNames = {
-  ciberseguridad: "Ciberseguridad",
-  programacion: "Programación",
-  ctf: "CTF",
-  juegos: "Juegos",
-  otros: "Otros"
-};
-
-const repoCategoryOverrides = {
-  "gestor-tickets": "otros",
-  "alien-pewpew": "juegos",
-  "password-manager": "otros",
-  "powpowercrawler": "ciberseguridad",
-  "csv_to_hash_sha256_comparator": "ciberseguridad",
-  "autoinfinitycraft": "juegos",
-  atica: "programacion"
-};
-
-const hiddenRepos = new Set([
-  "l183r.github.io",
-  "ia-test",
-  "pokemonheroes",
-  "buscador"
-]);
-
-const fallbackRepos = [
-  {
-    name: "repositorios-publicos",
-    description: "No se pudieron cargar los repos desde GitHub. Prueba el comando refresh.",
-    html_url: `https://github.com/${GITHUB_USER}`,
-    language: "GitHub",
-    topics: ["programacion"],
-    updated_at: new Date().toISOString()
+const projectCategories = {
+  ciberseguridad: {
+    name: "Ciberseguridad",
+    icon: "⛨",
+    description: "Herramientas ofensivas, defensivas y de análisis para automatizar investigaciones.",
+    color: "#70f7b1",
+    projects: [
+      "gestor-tickets",
+      "csv_to_hash_sha256_comparator",
+      "PowPowerCrawler",
+      "Password-manager",
+      "Buscador"
+    ]
+  },
+  juegos: {
+    name: "Juegos",
+    icon: "✦",
+    description: "Experimentos jugables con estética arcade, tensión y sistemas interactivos.",
+    color: "#ff7ad9",
+    projects: ["Necrosis", "Alien-PewPew"]
+  },
+  aprendizaje: {
+    name: "Aprendizaje",
+    icon: "◇",
+    description: "Laboratorio reservado para futuras notas, prácticas y rutas de estudio.",
+    color: "#6ce5ff",
+    projects: []
   }
-];
+};
+
+const categoryAliases = {
+  cyber: "ciberseguridad",
+  ciber: "ciberseguridad",
+  seguridad: "ciberseguridad",
+  games: "juegos",
+  game: "juegos",
+  aprendizaje: "aprendizaje",
+  learn: "aprendizaje",
+  learning: "aprendizaje"
+};
 
 const state = {
-  repos: [],
   currentCategory: null,
   currentPath: "~",
   history: [],
@@ -58,37 +53,32 @@ const form = document.querySelector("#terminal-form");
 const input = document.querySelector("#terminal-command");
 const lineTemplate = document.querySelector("#line-template");
 const categoryButtons = document.querySelectorAll(".category-button");
+const constellation = document.querySelector("#constellation");
+const categoryGrid = document.querySelector("#category-grid");
+const totalCounter = document.querySelector("#total-counter");
+const categoryCounter = document.querySelector("#category-counter");
 
 function normalize(text = "") {
   return text.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-function detectCategory(repo) {
-  const normalizedName = normalize(repo.name);
-  if (repoCategoryOverrides[normalizedName]) {
-    return repoCategoryOverrides[normalizedName];
-  }
+function getTotalProjects() {
+  return Object.values(projectCategories).reduce((total, category) => total + category.projects.length, 0);
+}
 
-  const searchableText = normalize([
-    repo.name,
-    repo.description,
-    repo.language,
-    ...(repo.topics || [])
-  ].filter(Boolean).join(" "));
+function resolveCategory(category) {
+  const normalized = normalize(category);
+  return projectCategories[normalized] ? normalized : categoryAliases[normalized];
+}
 
-  const matched = Object.entries(categoryDefinitions).find(([, keywords]) =>
-    keywords.some((keyword) => searchableText.includes(keyword))
+function getProjectUrl(projectName) {
+  return `https://github.com/${GITHUB_USER}/${projectName}`;
+}
+
+function getAllProjects() {
+  return Object.entries(projectCategories).flatMap(([categoryKey, category]) =>
+    category.projects.map((name) => ({ name, category: categoryKey, categoryName: category.name }))
   );
-
-  return matched ? matched[0] : "otros";
-}
-
-function shouldShowRepo(repo) {
-  return !hiddenRepos.has(normalize(repo.name));
-}
-
-function formatDate(date) {
-  return new Intl.DateTimeFormat("es", { dateStyle: "medium" }).format(new Date(date));
 }
 
 function addLine(text = "", variant = "") {
@@ -106,114 +96,104 @@ function addCommand(command) {
 }
 
 function printWelcome() {
-  addLine("Inicializando terminal de repositorios públicos...", "success");
-  addLine(`Usuario GitHub: ${GITHUB_USER}`, "muted");
-  addLine("Escribe 'help' para ver comandos disponibles o usa los botones de categorías.");
+  addLine("Sistema de clasificación orbital inicializado.", "success");
+  addLine("Mapa activo: ciberseguridad · juegos · aprendizaje", "muted");
+  addLine("Escribe 'help' o pulsa una categoría para desplegar sus proyectos.");
   addLine();
 }
 
 function printHelp() {
   addLine("Comandos disponibles:", "success");
   addLine("  help                         Muestra esta ayuda");
-  addLine("  ls                           Lista categorías o repositorios");
-  addLine(`  cd <categoria>               Entra en ${Object.keys(categoryDefinitions).join(", ")}`);
-  addLine("  cat <repo>                   Muestra detalles de un repositorio");
-  addLine("  open <repo>                  Abre el repositorio en GitHub");
+  addLine("  ls                           Lista categorías o proyectos");
+  addLine("  cd <categoria>               Entra en ciberseguridad, juegos o aprendizaje");
+  addLine("  cat <proyecto>               Muestra detalles del proyecto");
+  addLine("  open <proyecto>              Abre el repositorio en GitHub");
   addLine("  pwd                          Muestra la ruta actual");
   addLine("  clear                        Limpia la terminal");
-  addLine("  refresh                      Recarga repositorios desde GitHub");
-}
-
-function getVisibleRepos() {
-  if (!state.currentCategory) {
-    return state.repos;
-  }
-  return state.repos.filter((repo) => repo.category === state.currentCategory);
+  addLine("  home                         Vuelve al mapa principal");
 }
 
 function printCategories() {
-  addLine("Categorías disponibles:", "success");
-  Object.keys(categoryDefinitions).forEach((category) => {
-    const count = state.repos.filter((repo) => repo.category === category).length;
-    addLine(`  ${category.padEnd(16)} ${count} repositorio(s) - ${categoryNames[category]}`);
+  addLine("Nodos disponibles:", "success");
+  Object.entries(projectCategories).forEach(([key, category]) => {
+    addLine(`  ${key.padEnd(16)} ${String(category.projects.length).padStart(2, "0")} proyecto(s) - ${category.name}`);
   });
 }
 
-function printRepos(repos = getVisibleRepos()) {
-  if (!repos.length) {
-    addLine("No hay repositorios en esta categoría todavía.", "muted");
+function printProjects(categoryKey = state.currentCategory) {
+  const category = projectCategories[categoryKey];
+  if (!category.projects.length) {
+    addLine(`${category.name} está vacío por ahora: ranura preparada para aprendizaje futuro.`, "muted");
     return;
   }
 
-  repos.forEach((repo) => {
-    const language = repo.language || "sin lenguaje";
-    addLine(`  ${repo.name}  [${language}]  actualizado: ${formatDate(repo.updated_at)}`, "repo");
-    if (repo.description) {
-      addLine(`      ${repo.description}`, "muted");
-    }
+  category.projects.forEach((project, index) => {
+    addLine(`  ${(index + 1).toString().padStart(2, "0")}  ${project}  →  ${getProjectUrl(project)}`, "repo");
   });
 }
 
-function findRepo(repoName) {
-  const target = normalize(repoName);
-  return state.repos.find((repo) => normalize(repo.name) === target || normalize(repo.name).includes(target));
+function findProject(projectName) {
+  const target = normalize(projectName);
+  return getAllProjects().find((project) => normalize(project.name) === target || normalize(project.name).includes(target));
 }
 
-function printRepoDetails(repoName) {
-  const repo = findRepo(repoName);
-  if (!repo) {
-    addLine(`Repositorio no encontrado: ${repoName}`, "error");
+function printProjectDetails(projectName) {
+  const project = findProject(projectName);
+  if (!project) {
+    addLine(`Proyecto no encontrado: ${projectName}`, "error");
     return;
   }
 
-  addLine(repo.name, "repo");
-  addLine(`  Categoría: ${categoryNames[repo.category] || repo.category}`);
-  addLine(`  Lenguaje: ${repo.language || "No especificado"}`);
-  addLine(`  Actualizado: ${formatDate(repo.updated_at)}`);
-  addLine(`  URL: ${repo.html_url}`);
-  addLine(`  Descripción: ${repo.description || "Sin descripción"}`);
-  if (repo.topics?.length) {
-    addLine(`  Topics: ${repo.topics.join(", ")}`);
-  }
+  addLine(project.name, "repo");
+  addLine(`  Categoría: ${project.categoryName}`);
+  addLine(`  Estado: clasificado manualmente`);
+  addLine(`  URL: ${getProjectUrl(project.name)}`);
+}
+
+function setActiveCategory(categoryKey) {
+  document.querySelectorAll("[data-category]").forEach((element) => {
+    element.classList.toggle("is-active", element.dataset.category === categoryKey);
+  });
 }
 
 function changeCategory(category) {
-  const normalizedCategory = normalize(category);
-  if (!categoryDefinitions[normalizedCategory]) {
+  const categoryKey = resolveCategory(category);
+  if (!categoryKey) {
     addLine(`Categoría desconocida: ${category}`, "error");
-    addLine(`Usa: ${Object.keys(categoryDefinitions).join(", ")}`, "muted");
+    addLine(`Usa: ${Object.keys(projectCategories).join(", ")}`, "muted");
     return;
   }
 
-  state.currentCategory = normalizedCategory;
-  state.currentPath = `~/${normalizedCategory}`;
-  addLine(`Entrando en ${state.currentPath}`, "success");
-  printRepos();
+  state.currentCategory = categoryKey;
+  state.currentPath = `~/${categoryKey}`;
+  setActiveCategory(categoryKey);
+  addLine(`Atracando en ${state.currentPath}`, "success");
+  printProjects(categoryKey);
 }
 
 function goHome() {
   state.currentCategory = null;
   state.currentPath = "~";
-  addLine("Volviendo a ~", "success");
+  setActiveCategory(null);
+  addLine("Regresando al núcleo del clasificador.", "success");
   printCategories();
 }
 
-function openRepo(repoName) {
-  const repo = findRepo(repoName);
-  if (!repo) {
-    addLine(`Repositorio no encontrado: ${repoName}`, "error");
+function openProject(projectName) {
+  const project = findProject(projectName);
+  if (!project) {
+    addLine(`Proyecto no encontrado: ${projectName}`, "error");
     return;
   }
 
-  addLine(`Abriendo ${repo.html_url}`, "success");
-  window.open(repo.html_url, "_blank", "noopener,noreferrer");
+  addLine(`Abriendo ${getProjectUrl(project.name)}`, "success");
+  window.open(getProjectUrl(project.name), "_blank", "noopener,noreferrer");
 }
 
 function execute(command) {
   const trimmed = command.trim();
-  if (!trimmed) {
-    return;
-  }
+  if (!trimmed) return;
 
   addCommand(trimmed);
   const [rawAction, ...args] = trimmed.split(/\s+/);
@@ -226,20 +206,17 @@ function execute(command) {
       printHelp();
       break;
     case "ls":
-      state.currentCategory ? printRepos() : printCategories();
+      state.currentCategory ? printProjects() : printCategories();
       break;
     case "cd":
-      if (!argument || argument === "~" || argument === "..") {
-        goHome();
-      } else {
-        changeCategory(argument);
-      }
+      if (!argument || argument === "~" || argument === "..") goHome();
+      else changeCategory(argument);
       break;
     case "cat":
-      argument ? printRepoDetails(argument) : addLine("Uso: cat <repo>", "error");
+      argument ? printProjectDetails(argument) : addLine("Uso: cat <proyecto>", "error");
       break;
     case "open":
-      argument ? openRepo(argument) : addLine("Uso: open <repo>", "error");
+      argument ? openProject(argument) : addLine("Uso: open <proyecto>", "error");
       break;
     case "pwd":
       addLine(state.currentPath);
@@ -247,8 +224,8 @@ function execute(command) {
     case "clear":
       output.textContent = "";
       break;
-    case "refresh":
-      loadRepos(true);
+    case "home":
+      goHome();
       break;
     default:
       addLine(`Comando no encontrado: ${rawAction}`, "error");
@@ -256,28 +233,41 @@ function execute(command) {
   }
 }
 
-async function loadRepos(showMessage = false) {
-  if (showMessage) {
-    addLine("Consultando GitHub API...", "muted");
-  }
+function renderCategoryGrid() {
+  categoryGrid.innerHTML = Object.entries(projectCategories).map(([key, category]) => {
+    const projectList = category.projects.length
+      ? category.projects.map((project) => `<li><a href="${getProjectUrl(project)}" target="_blank" rel="noopener noreferrer">${project}</a></li>`).join("")
+      : `<li class="empty-slot">Vacío · esperando nuevas prácticas</li>`;
 
-  try {
-    const response = await fetch(API_URL, { headers: { Accept: "application/vnd.github+json" } });
-    if (!response.ok) {
-      throw new Error(`GitHub API respondió ${response.status}`);
-    }
-    const repos = await response.json();
-    state.repos = repos
-      .filter((repo) => !repo.fork && shouldShowRepo(repo))
-      .map((repo) => ({ ...repo, category: detectCategory(repo) }));
-    addLine(`${state.repos.length} repositorio(s) cargados correctamente.`, "success");
-  } catch (error) {
-    state.repos = fallbackRepos.map((repo) => ({ ...repo, category: detectCategory(repo) }));
-    addLine("No se pudo contactar con GitHub. Mostrando modo de respaldo.", "error");
-    addLine(error.message, "muted");
-  }
+    return `
+      <article class="classification-card" data-category="${key}" style="--accent: ${category.color}">
+        <div class="classification-card__header">
+          <span class="classification-card__icon">${category.icon}</span>
+          <span class="classification-card__count">${category.projects.length.toString().padStart(2, "0")}</span>
+        </div>
+        <h3>${category.name}</h3>
+        <p>${category.description}</p>
+        <ul>${projectList}</ul>
+      </article>
+    `;
+  }).join("");
 
-  state.currentCategory ? printRepos() : printCategories();
+  categoryGrid.querySelectorAll(".classification-card").forEach((card) => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("a")) return;
+      addCommand(`cd ${card.dataset.category}`);
+      changeCategory(card.dataset.category);
+      input.focus();
+    });
+  });
+}
+
+function renderConstellation() {
+  constellation.innerHTML = getAllProjects().map((project, index) => {
+    const angle = (360 / Math.max(getTotalProjects(), 1)) * index;
+    const category = projectCategories[project.category];
+    return `<a class="orbit-node" href="${getProjectUrl(project.name)}" target="_blank" rel="noopener noreferrer" style="--angle: ${angle}deg; --accent: ${category.color}" aria-label="Abrir ${project.name}"><span>${project.name}</span></a>`;
+  }).join("");
 }
 
 form.addEventListener("submit", (event) => {
@@ -312,6 +302,10 @@ categoryButtons.forEach((button) => {
   });
 });
 
+totalCounter.textContent = getTotalProjects().toString().padStart(2, "0");
+categoryCounter.textContent = Object.keys(projectCategories).length.toString().padStart(2, "0");
+renderCategoryGrid();
+renderConstellation();
 printWelcome();
-loadRepos();
+printCategories();
 input.focus();
