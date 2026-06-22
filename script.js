@@ -5,6 +5,7 @@ const projectCategories = {
   ciberseguridad: {
     name: "Ciberseguridad",
     character: "Guardian Shell",
+    image: "ciberseguridad.png",
     icon: "▣",
     stage: "Zona 01",
     description: "Scripts, defensa, análisis y automatización de investigaciones.",
@@ -20,6 +21,7 @@ const projectCategories = {
   juegos: {
     name: "Juegos",
     character: "Pixel Brawler",
+    image: "juegos.png",
     icon: "◆",
     stage: "Zona 02",
     description: "Cartuchos jugables con disparos, tensión, criaturas y sistemas interactivos.",
@@ -27,6 +29,18 @@ const projectCategories = {
     projects: [
       { name: "Necrosis", description: "Experiencia oscura de supervivencia con atmósfera hostil y combate contra criaturas." },
       { name: "Alien-PewPew", description: "Shooter arcade de ciencia ficción: apunta, esquiva y dispara contra oleadas alienígenas." }
+    ]
+  },
+  entrenamiento: {
+    name: "Entrenamiento",
+    character: "Training Master",
+    image: "entrenamiento.png",
+    icon: "▲",
+    stage: "Zona 03",
+    description: "Repos para practicar, aprender y pulir habilidades técnicas.",
+    color: "#7ee7ff",
+    projects: [
+      { name: "L183R.github.io", description: "Portafolio arcade retro para navegar mis repositorios como una pantalla de selección." }
     ]
   }
 };
@@ -99,16 +113,16 @@ function renderArcadeScreen() {
 
   document.body.dataset.screen = state.mode;
   arcadeStatus.textContent = isBoot ? "CREDITS 0" : "CREDITS 1";
-  screenTitle.textContent = isBoot ? "Credits 0" : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
+  screenTitle.textContent = isBoot ? getAllProjects().map(({ name }) => name).join(" · ") : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
   screenSubtitle.textContent = isBoot
-    ? "Insert coin"
+    ? "Insert coin(s)"
     : isCharacter
       ? "Clasificaciones de repos"
       : isStage
         ? `${category.character} · ${category.description}`
         : project.description;
   screenPrompt.textContent = isBoot
-    ? "Press Enter"
+    ? "Push Enter"
     : isCharacter
       ? "←/→ elige clasificación · Enter confirma"
       : isStage
@@ -131,7 +145,7 @@ function renderFighterSelect() {
   const project = getCurrentProject();
   fighterStage.textContent = state.mode === "boot" ? "BOOT 1989" : state.mode === "character" ? "SELECT CHARACTER" : `${category.stage} · ${category.name}`;
   fighterTitle.textContent = state.mode === "boot" ? "Credits 0" : state.mode === "character" ? "Select Character" : state.mode === "project" ? project.name : "Select Stage";
-  fighterDescription.textContent = state.mode === "boot" ? "Insert coin · Press Enter" : state.mode === "character" ? "Elige una clasificación para cargar sus repos." : state.mode === "project" ? project.description : category.description;
+  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Elige una clasificación para cargar sus repos." : state.mode === "project" ? project.description : category.description;
   if (menuLabel) menuLabel.textContent = state.mode === "boot" ? "Insert coin" : state.mode === "character" ? "Class select" : state.mode === "project" ? "Repo card" : "Stage select";
 
   if (state.mode === "character") {
@@ -139,7 +153,7 @@ function renderFighterSelect() {
       const item = projectCategories[categoryKey];
       return `
         <button class="fighter-card fighter-card--button ${categoryKey === state.currentCategory ? "is-selected" : ""}" type="button" data-category="${categoryKey}" style="--accent: ${item.color}">
-          <span class="fighter-card__sprite">${item.icon}</span>
+          <span class="fighter-card__sprite fighter-card__sprite--portrait" aria-hidden="true"><img src="${item.image}" alt="" loading="lazy"></span>
           <h3>${item.name}</h3>
           <p>${String(index + 1).padStart(2, "0")} · ${item.character}<br>${item.description}</p>
         </button>
@@ -181,6 +195,8 @@ function renderStageMap() {
   const isStageLike = state.mode === "stage" || state.mode === "project";
   const items = isStageLike ? getCurrentCategory().projects.map((project, index) => ({ ...project, category: state.currentCategory, index })) : getAllProjects();
   const positions = [[10, 18], [58, 14], [24, 38], [72, 42], [14, 67], [50, 70], [78, 75]];
+
+  stageMap.style.setProperty("--stage-image", `url(${isStageLike ? getCurrentCategory().image : "portada.png"})`);
 
   stageMap.innerHTML = items.map((project, index) => {
     const [left, top] = positions[index % positions.length];
