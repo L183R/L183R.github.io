@@ -23,14 +23,6 @@ const projectCategories = {
     description: "Cartuchos jugables con disparos, tensión, criaturas y sistemas interactivos.",
     color: "#ff8a20",
     projects: ["Necrosis", "Alien-PewPew"]
-  },
-  aprendizaje: {
-    name: "Aprendizaje",
-    icon: "★",
-    stage: "Bonus",
-    description: "Sala de entrenamiento reservada para prácticas, notas y rutas de estudio.",
-    color: "#26b7ff",
-    projects: []
   }
 };
 
