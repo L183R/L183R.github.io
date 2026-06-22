@@ -29,7 +29,8 @@ const projectCategories = {
 const state = {
   currentCategory: "ciberseguridad",
   currentCategoryIndex: 0,
-  musicReady: false
+  musicReady: false,
+  autoplayAttempted: false
 };
 
 const categoryKeys = Object.keys(projectCategories);
@@ -170,20 +171,31 @@ function renderStageMap() {
 }
 
 function startBackgroundMusic() {
-  if (!backgroundMusic || !musicToggle || state.musicReady) return;
+  if (!backgroundMusic || state.musicReady) return;
 
   backgroundMusic.volume = 0.42;
   backgroundMusic.play()
     .then(() => {
       state.musicReady = true;
-      musicToggle.classList.add("is-playing");
-      musicToggle.textContent = "♫ Música ON";
-      musicToggle.setAttribute("aria-pressed", "true");
+      musicToggle?.classList.add("is-playing");
+      if (musicToggle) {
+        musicToggle.textContent = "♫ Música ON";
+        musicToggle.setAttribute("aria-pressed", "true");
+      }
     })
     .catch(() => {
-      musicToggle.textContent = "♫ Activar música";
-      musicToggle.setAttribute("aria-pressed", "false");
+      if (musicToggle) {
+        musicToggle.textContent = "♫ Activar música";
+        musicToggle.setAttribute("aria-pressed", "false");
+      }
     });
+}
+
+function attemptAutoplay() {
+  if (state.autoplayAttempted) return;
+
+  state.autoplayAttempted = true;
+  startBackgroundMusic();
 }
 
 function toggleBackgroundMusic() {
@@ -241,6 +253,7 @@ categoryButtons.forEach((button) => {
 
 musicToggle?.addEventListener("click", toggleBackgroundMusic);
 document.addEventListener("keydown", handleKeyboardNavigation);
+window.addEventListener("load", attemptAutoplay, { once: true });
 
 totalCounter.textContent = getTotalProjects().toString().padStart(2, "0");
 categoryCounter.textContent = Object.keys(projectCategories).length.toString().padStart(2, "0");
