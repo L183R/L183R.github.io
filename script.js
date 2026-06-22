@@ -67,10 +67,6 @@ const characterPrev = document.querySelector("#character-prev");
 const characterNext = document.querySelector("#character-next");
 const backgroundMusic = document.querySelector("#background-music");
 const arcadeStatus = document.querySelector("#arcade-status");
-const screenTitle = document.querySelector("#screen-title");
-const screenSubtitle = document.querySelector("#screen-subtitle");
-const screenPrompt = document.querySelector("#screen-prompt");
-const screenCopyright = document.querySelector("#screen-copyright");
 const menuLabel = document.querySelector("#menu-label");
 
 backgroundMusic?.setAttribute("src", BACKGROUND_MUSIC);
@@ -107,33 +103,10 @@ function setActiveCategory(categoryKey) {
 }
 
 function renderArcadeScreen() {
-  const category = getCurrentCategory();
-  const project = getCurrentProject();
   const isBoot = state.mode === "boot";
-  const isCharacter = state.mode === "character";
-  const isStage = state.mode === "stage";
-  const isProject = state.mode === "project";
 
   document.body.dataset.screen = state.mode;
   arcadeStatus.textContent = isBoot ? "CREDITS 0" : "CREDITS 1";
-  screenTitle.textContent = isBoot ? "Mi repo" : isCharacter ? "Choose your character" : isStage ? "Select Stage" : project.name;
-  screenSubtitle.textContent = isBoot
-    ? "L183R"
-    : isCharacter
-      ? "Clasificaciones de repos"
-      : isStage
-        ? `${category.character} · ${category.description}`
-        : project.description;
-  screenPrompt.textContent = isBoot
-    ? "Push Enter"
-    : isCharacter
-      ? "←/→ elige clasificación · Enter confirma"
-      : isStage
-        ? "←/→ elige repo · Enter abre ficha"
-        : "Enter abre GitHub · Escape vuelve a Select Stage";
-
-  if (screenCopyright) screenCopyright.hidden = !isBoot;
-
   renderStageMap();
   renderFighterSelect();
   setActiveCategory(state.currentCategory);
