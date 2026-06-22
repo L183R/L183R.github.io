@@ -120,6 +120,12 @@ function renderArcadeScreen() {
   setActiveCategory(state.currentCategory);
 }
 
+
+function updateRosterCarousel() {
+  const selectedIndex = state.mode === "character" ? state.currentCategoryIndex : state.currentProjectIndex;
+  fighterRoster.style.setProperty("--carousel-offset", `calc(${selectedIndex} * (var(--card-width) + clamp(12px, 1.8vw, 18px)) * -1)`);
+}
+
 function renderFighterSelect() {
   const category = getCurrentCategory();
   const project = getCurrentProject();
@@ -139,6 +145,7 @@ function renderFighterSelect() {
         </button>
       `;
     }).join("");
+    updateRosterCarousel();
     return;
   }
 
@@ -149,6 +156,7 @@ function renderFighterSelect() {
       <p>${repo.description}</p>
     </button>
   `).join("");
+  updateRosterCarousel();
 }
 
 function changeCategory(categoryKey) {
