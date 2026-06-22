@@ -1,5 +1,6 @@
 const GITHUB_USER = "L183R";
 const BACKGROUND_MUSIC = "Cuatro Sombras Verdes.mp3";
+const MUSIC_PREFERENCE_KEY = "repo-arcade-music-enabled";
 
 const projectCategories = {
   ciberseguridad: {
@@ -51,7 +52,8 @@ const state = {
   currentCategoryIndex: 0,
   currentProjectIndex: 0,
   musicReady: false,
-  autoplayAttempted: false
+  autoplayAttempted: false,
+  musicEnabled: getStoredMusicPreference()
 };
 
 const categoryKeys = ["entrenamiento", "ciberseguridad", "juegos"];
@@ -79,6 +81,25 @@ const screenCopyright = document.querySelector("#screen-copyright");
 const menuLabel = document.querySelector("#menu-label");
 
 backgroundMusic?.setAttribute("src", BACKGROUND_MUSIC);
+
+function getStoredMusicPreference() {
+  return localStorage.getItem(MUSIC_PREFERENCE_KEY) !== "false";
+}
+
+function saveMusicPreference(isEnabled) {
+  localStorage.setItem(MUSIC_PREFERENCE_KEY, String(isEnabled));
+}
+
+function updateMusicToggle(isPlaying) {
+  if (!musicToggle) return;
+  musicToggle.classList.toggle("is-playing", isPlaying);
+  musicToggle.textContent = isPlaying
+    ? "♫ Música ON"
+    : state.musicEnabled
+      ? "♫ Activar música"
+      : "♫ Música OFF";
+  musicToggle.setAttribute("aria-pressed", String(isPlaying));
+}
 
 function getTotalProjects() {
   return Object.values(projectCategories).reduce((total, category) => total + category.projects.length, 0);
@@ -251,20 +272,14 @@ function renderStageMap() {
 }
 
 function startBackgroundMusic() {
-  if (!backgroundMusic || state.musicReady) return;
+  if (!backgroundMusic || state.musicReady || !state.musicEnabled) return;
   backgroundMusic.volume = 0.42;
   backgroundMusic.play().then(() => {
     state.musicReady = true;
-    musicToggle?.classList.add("is-playing");
-    if (musicToggle) {
-      musicToggle.textContent = "♫ Música ON";
-      musicToggle.setAttribute("aria-pressed", "true");
-    }
+    updateMusicToggle(true);
   }).catch(() => {
-    if (musicToggle) {
-      musicToggle.textContent = "♫ Activar música";
-      musicToggle.setAttribute("aria-pressed", "false");
-    }
+    state.musicReady = false;
+    updateMusicToggle(false);
   });
 }
 
@@ -277,14 +292,16 @@ function attemptAutoplay() {
 function toggleBackgroundMusic() {
   if (!backgroundMusic || !musicToggle) return;
   if (backgroundMusic.paused) {
+    state.musicEnabled = true;
+    saveMusicPreference(true);
     startBackgroundMusic();
     return;
   }
+  state.musicEnabled = false;
+  saveMusicPreference(false);
   backgroundMusic.pause();
   state.musicReady = false;
-  musicToggle.classList.remove("is-playing");
-  musicToggle.textContent = "♫ Música OFF";
-  musicToggle.setAttribute("aria-pressed", "false");
+  updateMusicToggle(false);
 }
 
 function confirmSelection() {
@@ -395,3 +412,4 @@ window.addEventListener("load", attemptAutoplay, { once: true });
 
 totalCounter.textContent = getTotalProjects().toString().padStart(2, "0");
 renderArcadeScreen();
+updateMusicToggle(false);
