@@ -129,10 +129,10 @@ function renderArcadeScreen() {
   screenPrompt.textContent = isBoot
     ? "Push Enter"
     : isCharacter
-      ? "←/→ elige clasificación · Enter confirma"
+      ? "←/→ elige clasificación · Enter confirma · Esc vuelve"
       : isStage
-        ? "←/→ elige repo · Enter abre ficha"
-        : "Enter abre GitHub · Escape vuelve a Select Stage";
+        ? "←/→ elige repo · Enter abre ficha · Esc vuelve"
+        : "Enter abre GitHub · Esc vuelve a Select Stage";
 
   if (screenCopyright) screenCopyright.hidden = !isBoot;
 
@@ -152,7 +152,7 @@ function renderFighterSelect() {
   const project = getCurrentProject();
   fighterStage.textContent = state.mode === "boot" ? "BOOT 1989" : state.mode === "character" ? "SELECT CHARACTER" : `${category.stage} · ${category.name}`;
   fighterTitle.textContent = state.mode === "boot" ? "Credits 0" : state.mode === "character" ? "Choose your character" : state.mode === "project" ? project.name : "Select Stage";
-  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Clasificación de los repositorios" : state.mode === "project" ? project.description : category.description;
+  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Clasificación de los repositorios · Esc vuelve al inicio" : state.mode === "project" ? `${project.description} · Esc vuelve a Select Stage` : `${category.description} · Esc vuelve a Character Select`;
   if (menuLabel) menuLabel.textContent = state.mode === "boot" ? "Insert coin" : state.mode === "character" ? "Character select" : state.mode === "project" ? "Repo card" : "Stage select";
 
   if (state.mode === "character") {
@@ -268,6 +268,15 @@ function confirmSelection() {
   renderArcadeScreen();
 }
 
+function returnToPreviousScreen() {
+  if (state.mode === "boot") return false;
+  if (state.mode === "character") state.mode = "boot";
+  else if (state.mode === "stage") state.mode = "character";
+  else if (state.mode === "project") state.mode = "stage";
+  renderArcadeScreen();
+  return true;
+}
+
 function handleKeyboardNavigation(event) {
   if (["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
   const key = event.key.toLowerCase();
@@ -276,10 +285,8 @@ function handleKeyboardNavigation(event) {
     confirmSelection();
     return;
   }
-  if (key === "escape" && state.mode === "project") {
+  if (key === "escape" && returnToPreviousScreen()) {
     event.preventDefault();
-    state.mode = "stage";
-    renderArcadeScreen();
     return;
   }
   if (!["arrowleft", "a", "arrowright", "d"].includes(key) || state.mode === "boot") return;
