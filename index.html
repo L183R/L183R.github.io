@@ -13,23 +13,29 @@
     <section class="hero" aria-labelledby="page-title">
       <div class="hero__copy-block">
         <p class="eyebrow">insert coin · repo patrol · 8-bit</p>
-        <h1 id="page-title">Elige una zona y entra al gabinete de proyectos</h1>
+        <h1 id="page-title">Arcade de repositorios</h1>
         <p class="hero__copy">
-          Una pantalla pixelada organiza mis repositorios como fases de acción: seguridad,
-          juegos. Pulsa un cartucho para cambiar el roster del escenario.
+          La web arranca como un gabinete clásico: 0 credits, Enter para insertar moneda,
+          Select Character para escoger categoría y Select Stage para entrar a cada repo.
         </p>
         <div class="hero__actions" aria-label="Controles principales">
           <button class="coin-button" type="button" data-category="ciberseguridad">1P Seguridad</button>
           <button class="coin-button" type="button" data-category="juegos">2P Juegos</button>
           <button class="music-button" id="music-toggle" type="button" aria-pressed="false">♫ Activar música</button>
         </div>
-        <p class="control-hint">Usa A/D o ←/→ para cambiar de zona. Usa W/S o ↑/↓ para saltar entre el gabinete y el roster.</p>
+        <p class="control-hint">Enter confirma. ←/→ o A/D cambian la selección. Escape vuelve desde la ficha del repo.</p>
       </div>
 
       <aside class="cabinet" aria-label="Gabinete arcade con contador de repositorios">
         <div class="cabinet__marquee">L183R REPO ARCADE</div>
-        <div class="cabinet__screen">
+        <div class="cabinet__screen" aria-live="polite">
           <div class="screen-grid" id="stage-map"></div>
+          <div class="arcade-overlay">
+            <p class="arcade-overlay__status" id="arcade-status">0 CREDITS</p>
+            <h2 class="arcade-overlay__title" id="screen-title">0 credits</h2>
+            <p class="arcade-overlay__subtitle" id="screen-subtitle">Insert coins</p>
+            <p class="arcade-overlay__prompt" id="screen-prompt">Insert coins (push Enter)</p>
+          </div>
           <div class="pixel-hero" aria-hidden="true">
             <span class="pixel-hero__head"></span>
             <span class="pixel-hero__body"></span>
