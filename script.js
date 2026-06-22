@@ -40,7 +40,6 @@ const projectCategories = {
     description: "Repos para practicar, aprender y pulir habilidades técnicas.",
     color: "#7ee7ff",
     projects: [
-      { name: "L183R.github.io", image: "entrenamiento.png", description: "Portafolio arcade retro para navegar mis repositorios como una pantalla de selección." },
       { name: "CTF2025", image: "CTF_2025.png", description: "Entrenamiento CTF para practicar retos, documentar aprendizaje y fortalecer habilidades de seguridad." }
     ]
   }
