@@ -615,7 +615,15 @@ body[data-screen="stage"] .stage-select-card__middle .carousel-arrow {
   gap: clamp(8px, 1.2vh, 12px);
   min-height: clamp(220px, 39vh, 330px);
   padding: clamp(12px, 2vw, 18px);
+  font: inherit;
   text-align: center;
+  cursor: pointer;
+}
+
+.stage-select-card__panel--character:hover,
+.stage-select-card__panel--character:focus-visible {
+  outline: 4px solid var(--mint);
+  outline-offset: 3px;
 }
 
 .stage-select-card__panel--character img {
