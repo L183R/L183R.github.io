@@ -8,7 +8,7 @@ const projectCategories = {
     icon: "▣",
     stage: "Zona 01",
     description: "Scripts, defensa, análisis y automatización de investigaciones.",
-    color: "#20e35f",
+    color: "#9cffb1",
     projects: [
       { name: "gestor-tickets", description: "Sistema para ordenar incidencias, priorizar tareas y mantener una cola operativa de soporte." },
       { name: "csv_to_hash_sha256_comparator", description: "Utilidad para comparar hashes SHA-256 desde CSV y detectar coincidencias o cambios sospechosos." },
@@ -23,7 +23,7 @@ const projectCategories = {
     icon: "◆",
     stage: "Zona 02",
     description: "Cartuchos jugables con disparos, tensión, criaturas y sistemas interactivos.",
-    color: "#ff8a20",
+    color: "#ff7ac8",
     projects: [
       { name: "Necrosis", description: "Experiencia oscura de supervivencia con atmósfera hostil y combate contra criaturas." },
       { name: "Alien-PewPew", description: "Shooter arcade de ciencia ficción: apunta, esquiva y dispara contra oleadas alienígenas." }
@@ -54,6 +54,7 @@ const arcadeStatus = document.querySelector("#arcade-status");
 const screenTitle = document.querySelector("#screen-title");
 const screenSubtitle = document.querySelector("#screen-subtitle");
 const screenPrompt = document.querySelector("#screen-prompt");
+const menuLabel = document.querySelector("#menu-label");
 
 backgroundMusic?.setAttribute("src", BACKGROUND_MUSIC);
 
@@ -97,21 +98,21 @@ function renderArcadeScreen() {
   const isProject = state.mode === "project";
 
   document.body.dataset.screen = state.mode;
-  arcadeStatus.textContent = isBoot ? "0 CREDITS" : "1 CREDIT";
-  screenTitle.textContent = isBoot ? "0 credits" : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
+  arcadeStatus.textContent = isBoot ? "CREDITS 0" : "CREDITS 1";
+  screenTitle.textContent = isBoot ? "Credits 0" : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
   screenSubtitle.textContent = isBoot
-    ? "Insert coins"
+    ? "Insert coin"
     : isCharacter
-      ? "Elige una categoría de repos"
+      ? "Clasificaciones de repos"
       : isStage
         ? `${category.character} · ${category.description}`
         : project.description;
   screenPrompt.textContent = isBoot
-    ? "Insert coins (push Enter)"
+    ? "Press Enter"
     : isCharacter
-      ? "←/→ cambia categoría · Enter confirma"
+      ? "←/→ elige clasificación · Enter confirma"
       : isStage
-        ? "←/→ cambia stage · Enter abre ficha"
+        ? "←/→ elige repo · Enter abre ficha"
         : "Enter abre GitHub · Escape vuelve a Select Stage";
 
   renderStageMap();
@@ -122,9 +123,10 @@ function renderArcadeScreen() {
 function renderFighterSelect() {
   const category = getCurrentCategory();
   const project = getCurrentProject();
-  fighterStage.textContent = state.mode === "character" ? "SELECT CHARACTER" : `${category.stage} · ${category.name}`;
-  fighterTitle.textContent = state.mode === "character" ? "Select Character" : state.mode === "project" ? project.name : "Select Stage";
-  fighterDescription.textContent = state.mode === "project" ? project.description : category.description;
+  fighterStage.textContent = state.mode === "boot" ? "BOOT 1989" : state.mode === "character" ? "SELECT CHARACTER" : `${category.stage} · ${category.name}`;
+  fighterTitle.textContent = state.mode === "boot" ? "Credits 0" : state.mode === "character" ? "Select Character" : state.mode === "project" ? project.name : "Select Stage";
+  fighterDescription.textContent = state.mode === "boot" ? "Insert coin · Press Enter" : state.mode === "character" ? "Elige una clasificación para cargar sus repos." : state.mode === "project" ? project.description : category.description;
+  if (menuLabel) menuLabel.textContent = state.mode === "boot" ? "Insert coin" : state.mode === "character" ? "Class select" : state.mode === "project" ? "Repo card" : "Stage select";
 
   if (state.mode === "character") {
     fighterRoster.innerHTML = categoryKeys.map((categoryKey, index) => {
@@ -132,8 +134,8 @@ function renderFighterSelect() {
       return `
         <button class="fighter-card fighter-card--button ${categoryKey === state.currentCategory ? "is-selected" : ""}" type="button" data-category="${categoryKey}" style="--accent: ${item.color}">
           <span class="fighter-card__sprite">${item.icon}</span>
-          <h3>${item.character}</h3>
-          <p>${String(index + 1).padStart(2, "0")} · ${item.name}<br>${item.description}</p>
+          <h3>${item.name}</h3>
+          <p>${String(index + 1).padStart(2, "0")} · ${item.character}<br>${item.description}</p>
         </button>
       `;
     }).join("");
