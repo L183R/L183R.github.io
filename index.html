@@ -3,77 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Clasificador animado de proyectos de L183R por ciberseguridad, juegos y aprendizaje." />
-  <title>L183R | Clasificador orbital</title>
+  <meta name="description" content="Gabinete arcade retro para presentar los repositorios de L183R por zonas de misión." />
+  <title>L183R | Arcade de repositorios</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="shell-page">
+  <main class="arcade-page">
     <section class="hero" aria-labelledby="page-title">
-      <div class="hero__content">
-        <p class="eyebrow">clasificador / orbital / vivo</p>
-        <h1 id="page-title">Sistema animado para ordenar proyectos por misión</h1>
+      <div class="hero__copy-block">
+        <p class="eyebrow">insert coin · repo patrol · 8-bit</p>
+        <h1 id="page-title">Elige una zona y entra al gabinete de proyectos</h1>
         <p class="hero__copy">
-          Una consola con mapa estelar clasifica manualmente cada repositorio en tres rutas:
-          <code>Ciberseguridad</code>, <code>Juegos</code> y <code>Aprendizaje</code>.
+          Una pantalla pixelada organiza mis repositorios como fases de acción: seguridad,
+          juegos y entrenamiento. Pulsa un cartucho, lee la marquesina o usa comandos rápidos.
         </p>
+        <div class="hero__actions" aria-label="Controles principales">
+          <button class="coin-button" type="button" data-category="ciberseguridad">1P Seguridad</button>
+          <button class="coin-button" type="button" data-category="juegos">2P Juegos</button>
+          <button class="coin-button" type="button" data-category="aprendizaje">Bonus Entreno</button>
+        </div>
       </div>
 
-      <aside class="system-orb" aria-label="Resumen visual del sistema">
-        <div class="system-orb__ring system-orb__ring--outer"></div>
-        <div class="system-orb__ring system-orb__ring--inner"></div>
-        <div class="system-orb__core">
-          <strong id="total-counter">00</strong>
-          <span>proyectos</span>
+      <aside class="cabinet" aria-label="Gabinete arcade con contador de repositorios">
+        <div class="cabinet__marquee">L183R REPO ARCADE</div>
+        <div class="cabinet__screen">
+          <div class="screen-grid" id="stage-map"></div>
+          <div class="pixel-hero" aria-hidden="true">
+            <span class="pixel-hero__head"></span>
+            <span class="pixel-hero__body"></span>
+            <span class="pixel-hero__belt"></span>
+            <span class="pixel-hero__arm pixel-hero__arm--left"></span>
+            <span class="pixel-hero__arm pixel-hero__arm--right"></span>
+            <span class="pixel-hero__leg pixel-hero__leg--left"></span>
+            <span class="pixel-hero__leg pixel-hero__leg--right"></span>
+          </div>
+          <div class="score-board">
+            <span>repos</span>
+            <strong id="total-counter">00</strong>
+          </div>
         </div>
-        <div id="constellation" class="constellation"></div>
+        <div class="cabinet__controls" aria-hidden="true">
+          <span class="joystick"></span>
+          <span class="arcade-button arcade-button--red"></span>
+          <span class="arcade-button arcade-button--yellow"></span>
+          <span class="arcade-button arcade-button--blue"></span>
+        </div>
       </aside>
     </section>
 
-    <section class="classification-panel" aria-labelledby="classification-title">
-      <div class="classification-panel__heading">
+    <section class="stage-panel" aria-labelledby="stage-title">
+      <div class="stage-panel__heading">
         <div>
-          <p class="eyebrow">rutas clasificadas</p>
-          <h2 id="classification-title">Tres bóvedas, una navegación</h2>
+          <p class="eyebrow">select stage</p>
+          <h2 id="stage-title">Cartuchos cargados</h2>
         </div>
-        <p><strong id="category-counter">03</strong> categorías sincronizadas con comandos rápidos.</p>
+        <p><strong id="category-counter">03</strong> zonas con accesos directos a GitHub.</p>
       </div>
       <div id="category-grid" class="category-grid"></div>
     </section>
 
-    <section class="terminal-card" aria-label="Terminal interactiva de clasificación">
-      <div class="terminal-card__bar" aria-hidden="true">
-        <span class="dot dot--red"></span>
-        <span class="dot dot--yellow"></span>
-        <span class="dot dot--green"></span>
-        <span class="terminal-card__title">bash — clasificador-orbital</span>
+    <section class="command-deck" aria-label="Panel interactivo de comandos">
+      <div class="command-deck__header">
+        <span>CRT COMMAND DECK</span>
+        <span class="lives" aria-label="vidas decorativas">♥ ♥ ♥</span>
       </div>
-
       <div id="terminal-output" class="terminal-output" role="log" aria-live="polite"></div>
-
       <form id="terminal-form" class="terminal-input" autocomplete="off">
-        <label for="terminal-command" class="prompt">L183R@github:~$</label>
-        <input
-          id="terminal-command"
-          name="command"
-          type="text"
-          spellcheck="false"
-          aria-label="Escribe un comando de terminal"
-          placeholder="cd ciberseguridad"
-        />
+        <label for="terminal-command" class="prompt">PLAYER@L183R:~&gt;</label>
+        <input id="terminal-command" name="command" type="text" spellcheck="false" aria-label="Escribe un comando" placeholder="stage juegos" />
       </form>
-    </section>
-
-    <section class="category-panel" aria-labelledby="category-title">
-      <div>
-        <p class="eyebrow">atajos de navegación</p>
-        <h2 id="category-title">Selecciona un nodo</h2>
-      </div>
-      <div class="category-buttons" role="list">
-        <button class="category-button" type="button" data-category="ciberseguridad">Ciberseguridad</button>
-        <button class="category-button" type="button" data-category="juegos">Juegos</button>
-        <button class="category-button" type="button" data-category="aprendizaje">Aprendizaje</button>
-      </div>
     </section>
   </main>
 

@@ -3,9 +3,10 @@ const GITHUB_USER = "L183R";
 const projectCategories = {
   ciberseguridad: {
     name: "Ciberseguridad",
-    icon: "⛨",
-    description: "Herramientas ofensivas, defensivas y de análisis para automatizar investigaciones.",
-    color: "#70f7b1",
+    icon: "▣",
+    stage: "Zona 01",
+    description: "Patrulla técnica para scripts, defensa, análisis y automatización de investigaciones.",
+    color: "#20e35f",
     projects: [
       "gestor-tickets",
       "csv_to_hash_sha256_comparator",
@@ -16,16 +17,18 @@ const projectCategories = {
   },
   juegos: {
     name: "Juegos",
-    icon: "✦",
-    description: "Experimentos jugables con estética arcade, tensión y sistemas interactivos.",
-    color: "#ff7ad9",
+    icon: "◆",
+    stage: "Zona 02",
+    description: "Cartuchos jugables con disparos, tensión, criaturas y sistemas interactivos.",
+    color: "#ff8a20",
     projects: ["Necrosis", "Alien-PewPew"]
   },
   aprendizaje: {
     name: "Aprendizaje",
-    icon: "◇",
-    description: "Laboratorio reservado para futuras notas, prácticas y rutas de estudio.",
-    color: "#6ce5ff",
+    icon: "★",
+    stage: "Bonus",
+    description: "Sala de entrenamiento reservada para prácticas, notas y rutas de estudio.",
+    color: "#26b7ff",
     projects: []
   }
 };
@@ -52,8 +55,8 @@ const output = document.querySelector("#terminal-output");
 const form = document.querySelector("#terminal-form");
 const input = document.querySelector("#terminal-command");
 const lineTemplate = document.querySelector("#line-template");
-const categoryButtons = document.querySelectorAll(".category-button");
-const constellation = document.querySelector("#constellation");
+const categoryButtons = document.querySelectorAll(".coin-button");
+const stageMap = document.querySelector("#stage-map");
 const categoryGrid = document.querySelector("#category-grid");
 const totalCounter = document.querySelector("#total-counter");
 const categoryCounter = document.querySelector("#category-counter");
@@ -96,9 +99,9 @@ function addCommand(command) {
 }
 
 function printWelcome() {
-  addLine("Sistema de clasificación orbital inicializado.", "success");
-  addLine("Mapa activo: ciberseguridad · juegos · aprendizaje", "muted");
-  addLine("Escribe 'help' o pulsa una categoría para desplegar sus proyectos.");
+  addLine("Gabinete encendido. Créditos: 01", "success");
+  addLine("Fases cargadas: ciberseguridad · juegos · aprendizaje", "muted");
+  addLine("Escribe 'help', 'stage <zona>' o pulsa un cartucho para desplegar repos.");
   addLine();
 }
 
@@ -106,7 +109,7 @@ function printHelp() {
   addLine("Comandos disponibles:", "success");
   addLine("  help                         Muestra esta ayuda");
   addLine("  ls                           Lista categorías o proyectos");
-  addLine("  cd <categoria>               Entra en ciberseguridad, juegos o aprendizaje");
+  addLine("  cd/stage <categoria>         Entra en ciberseguridad, juegos o aprendizaje");
   addLine("  cat <proyecto>               Muestra detalles del proyecto");
   addLine("  open <proyecto>              Abre el repositorio en GitHub");
   addLine("  pwd                          Muestra la ruta actual");
@@ -115,16 +118,16 @@ function printHelp() {
 }
 
 function printCategories() {
-  addLine("Nodos disponibles:", "success");
+  addLine("Pantalla de selección:", "success");
   Object.entries(projectCategories).forEach(([key, category]) => {
-    addLine(`  ${key.padEnd(16)} ${String(category.projects.length).padStart(2, "0")} proyecto(s) - ${category.name}`);
+    addLine(`  ${category.stage.padEnd(8)} ${key.padEnd(16)} ${String(category.projects.length).padStart(2, "0")} repo(s)`);
   });
 }
 
 function printProjects(categoryKey = state.currentCategory) {
   const category = projectCategories[categoryKey];
   if (!category.projects.length) {
-    addLine(`${category.name} está vacío por ahora: ranura preparada para aprendizaje futuro.`, "muted");
+    addLine(`${category.name} no tiene cartucho insertado todavía: bonus listo para futuro entrenamiento.`, "muted");
     return;
   }
 
@@ -147,7 +150,7 @@ function printProjectDetails(projectName) {
 
   addLine(project.name, "repo");
   addLine(`  Categoría: ${project.categoryName}`);
-  addLine(`  Estado: clasificado manualmente`);
+  addLine(`  Estado: cartucho validado`);
   addLine(`  URL: ${getProjectUrl(project.name)}`);
 }
 
@@ -168,7 +171,7 @@ function changeCategory(category) {
   state.currentCategory = categoryKey;
   state.currentPath = `~/${categoryKey}`;
   setActiveCategory(categoryKey);
-  addLine(`Atracando en ${state.currentPath}`, "success");
+  addLine(`Entrando a ${state.currentPath}. Preparado para combate de código.`, "success");
   printProjects(categoryKey);
 }
 
@@ -176,7 +179,7 @@ function goHome() {
   state.currentCategory = null;
   state.currentPath = "~";
   setActiveCategory(null);
-  addLine("Regresando al núcleo del clasificador.", "success");
+  addLine("Volviendo a la pantalla de selección.", "success");
   printCategories();
 }
 
@@ -209,6 +212,8 @@ function execute(command) {
       state.currentCategory ? printProjects() : printCategories();
       break;
     case "cd":
+    case "stage":
+    case "fase":
       if (!argument || argument === "~" || argument === "..") goHome();
       else changeCategory(argument);
       break;
@@ -237,13 +242,13 @@ function renderCategoryGrid() {
   categoryGrid.innerHTML = Object.entries(projectCategories).map(([key, category]) => {
     const projectList = category.projects.length
       ? category.projects.map((project) => `<li><a href="${getProjectUrl(project)}" target="_blank" rel="noopener noreferrer">${project}</a></li>`).join("")
-      : `<li class="empty-slot">Vacío · esperando nuevas prácticas</li>`;
+      : `<li class="empty-slot">Bonus bloqueado · esperando práctica</li>`;
 
     return `
-      <article class="classification-card" data-category="${key}" style="--accent: ${category.color}">
-        <div class="classification-card__header">
-          <span class="classification-card__icon">${category.icon}</span>
-          <span class="classification-card__count">${category.projects.length.toString().padStart(2, "0")}</span>
+      <article class="stage-card" data-category="${key}" style="--accent: ${category.color}">
+        <div class="stage-card__top">
+          <span class="stage-card__badge">${category.icon}</span>
+          <span class="stage-card__count">${category.stage} · ${category.projects.length.toString().padStart(2, "0")}</span>
         </div>
         <h3>${category.name}</h3>
         <p>${category.description}</p>
@@ -252,21 +257,25 @@ function renderCategoryGrid() {
     `;
   }).join("");
 
-  categoryGrid.querySelectorAll(".classification-card").forEach((card) => {
+  categoryGrid.querySelectorAll(".stage-card").forEach((card) => {
     card.addEventListener("click", (event) => {
       if (event.target.closest("a")) return;
-      addCommand(`cd ${card.dataset.category}`);
+      addCommand(`stage ${card.dataset.category}`);
       changeCategory(card.dataset.category);
       input.focus();
     });
   });
 }
 
-function renderConstellation() {
-  constellation.innerHTML = getAllProjects().map((project, index) => {
-    const angle = (360 / Math.max(getTotalProjects(), 1)) * index;
+function renderStageMap() {
+  const positions = [
+    [10, 18], [58, 14], [24, 38], [72, 42], [14, 67], [50, 70], [78, 75]
+  ];
+
+  stageMap.innerHTML = getAllProjects().map((project, index) => {
+    const [left, top] = positions[index % positions.length];
     const category = projectCategories[project.category];
-    return `<a class="orbit-node" href="${getProjectUrl(project.name)}" target="_blank" rel="noopener noreferrer" style="--angle: ${angle}deg; --accent: ${category.color}" aria-label="Abrir ${project.name}"><span>${project.name}</span></a>`;
+    return `<a class="map-node" href="${getProjectUrl(project.name)}" target="_blank" rel="noopener noreferrer" style="left: ${left}%; top: ${top}%; --accent: ${category.color}" aria-label="Abrir ${project.name}">■<span>${project.name}</span></a>`;
   }).join("");
 }
 
@@ -296,7 +305,7 @@ input.addEventListener("keydown", (event) => {
 categoryButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const category = button.dataset.category;
-    addCommand(`cd ${category}`);
+    addCommand(`stage ${category}`);
     changeCategory(category);
     input.focus();
   });
@@ -305,7 +314,7 @@ categoryButtons.forEach((button) => {
 totalCounter.textContent = getTotalProjects().toString().padStart(2, "0");
 categoryCounter.textContent = Object.keys(projectCategories).length.toString().padStart(2, "0");
 renderCategoryGrid();
-renderConstellation();
+renderStageMap();
 printWelcome();
 printCategories();
 input.focus();
