@@ -143,7 +143,7 @@ function renderArcadeScreen() {
 
 
 function updateRosterCarousel() {
-  const selectedIndex = state.mode === "character" ? state.currentCategoryIndex : state.currentProjectIndex;
+  const selectedIndex = state.mode === "character" ? 1 : state.currentProjectIndex;
   fighterRoster.style.setProperty("--carousel-offset", `calc(${selectedIndex} * (var(--card-width) + clamp(12px, 1.8vw, 18px)) * -1)`);
 }
 
@@ -152,17 +152,26 @@ function renderFighterSelect() {
   const project = getCurrentProject();
   fighterStage.textContent = state.mode === "boot" ? "BOOT 1989" : state.mode === "character" ? "SELECT CHARACTER" : `${category.stage} · ${category.name}`;
   fighterTitle.textContent = state.mode === "boot" ? "Credits 0" : state.mode === "character" ? "Choose your character" : state.mode === "project" ? project.name : "Select Stage";
-  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Entrenamiento · Ciberseguridad · Juegos" : state.mode === "project" ? project.description : category.description;
+  fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Clasificación de los repositorios" : state.mode === "project" ? project.description : category.description;
   if (menuLabel) menuLabel.textContent = state.mode === "boot" ? "Insert coin" : state.mode === "character" ? "Character select" : state.mode === "project" ? "Repo card" : "Stage select";
 
   if (state.mode === "character") {
-    fighterRoster.innerHTML = categoryKeys.map((categoryKey, index) => {
+    const previousIndex = (state.currentCategoryIndex - 1 + categoryKeys.length) % categoryKeys.length;
+    const nextIndex = (state.currentCategoryIndex + 1) % categoryKeys.length;
+    const visibleCategoryKeys = [
+      categoryKeys[previousIndex],
+      categoryKeys[state.currentCategoryIndex],
+      categoryKeys[nextIndex]
+    ];
+
+    fighterRoster.innerHTML = visibleCategoryKeys.map((categoryKey) => {
       const item = projectCategories[categoryKey];
+      const originalIndex = categoryKeys.indexOf(categoryKey);
       return `
         <button class="fighter-card fighter-card--button ${categoryKey === state.currentCategory ? "is-selected" : ""}" type="button" data-category="${categoryKey}" style="--accent: ${item.color}">
           <span class="fighter-card__sprite fighter-card__sprite--portrait" aria-hidden="true"><img src="${item.image}" alt="" loading="lazy"></span>
           <h3>${item.name}</h3>
-          <p>${String(index + 1).padStart(2, "0")} · ${item.character}<br>${item.description}</p>
+          <p>${String(originalIndex + 1).padStart(2, "0")} · ${item.character}<br>${item.description}</p>
         </button>
       `;
     }).join("");
