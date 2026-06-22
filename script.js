@@ -11,10 +11,10 @@ const projectCategories = {
     description: "Scripts, defensa, análisis y automatización de investigaciones.",
     color: "#9cffb1",
     projects: [
-      { name: "gestor-tickets", description: "Sistema para ordenar incidencias, priorizar tareas y mantener una cola operativa de soporte." },
-      { name: "csv_to_hash_sha256_comparator", description: "Utilidad para comparar hashes SHA-256 desde CSV y detectar coincidencias o cambios sospechosos." },
-      { name: "PowPowerCrawler", description: "Crawler experimental para rastrear objetivos, recolectar datos y preparar reconocimiento técnico." },
-      { name: "Password-manager", description: "Gestor de contraseñas pensado como caja fuerte personal para credenciales y secretos." },
+      { name: "gestor-tickets", image: "gestor-tickets.png", description: "Sistema para ordenar incidencias, priorizar tareas y mantener una cola operativa de soporte." },
+      { name: "csv_to_hash_sha256_comparator", image: "csv_to_hash_sha256_comparator.png", description: "Utilidad para comparar hashes SHA-256 desde CSV y detectar coincidencias o cambios sospechosos." },
+      { name: "PowPowerCrawler", image: "PowPowerCrawler.png", description: "Crawler experimental para rastrear objetivos, recolectar datos y preparar reconocimiento técnico." },
+      { name: "Password-manager", image: "Password-manager.png", description: "Gestor de contraseñas pensado como caja fuerte personal para credenciales y secretos." },
       { name: "Buscador", description: "Buscador práctico para filtrar información y acelerar revisiones dentro de conjuntos de datos." }
     ]
   },
@@ -27,8 +27,8 @@ const projectCategories = {
     description: "Cartuchos jugables con disparos, tensión, criaturas y sistemas interactivos.",
     color: "#ff7ac8",
     projects: [
-      { name: "Necrosis", description: "Experiencia oscura de supervivencia con atmósfera hostil y combate contra criaturas." },
-      { name: "Alien-PewPew", description: "Shooter arcade de ciencia ficción: apunta, esquiva y dispara contra oleadas alienígenas." }
+      { name: "Necrosis", image: "necrosis.png", description: "Experiencia oscura de supervivencia con atmósfera hostil y combate contra criaturas." },
+      { name: "Alien-PewPew", image: "Alien-PewPew.png", description: "Shooter arcade de ciencia ficción: apunta, esquiva y dispara contra oleadas alienígenas." }
     ]
   },
   entrenamiento: {
@@ -40,7 +40,7 @@ const projectCategories = {
     description: "Repos para practicar, aprender y pulir habilidades técnicas.",
     color: "#7ee7ff",
     projects: [
-      { name: "L183R.github.io", description: "Portafolio arcade retro para navegar mis repositorios como una pantalla de selección." }
+      { name: "L183R.github.io", image: "entrenamiento.png", description: "Portafolio arcade retro para navegar mis repositorios como una pantalla de selección." }
     ]
   }
 };
@@ -56,6 +56,10 @@ const state = {
 
 const categoryKeys = ["entrenamiento", "ciberseguridad", "juegos"];
 const categoryButtons = document.querySelectorAll(".coin-button");
+
+function getProjectImage(project, category) {
+  return project?.image || category?.image || "portada.png";
+}
 const stageMap = document.querySelector("#stage-map");
 const totalCounter = document.querySelector("#total-counter");
 const fighterStage = document.querySelector("#fighter-stage");
@@ -155,6 +159,30 @@ function renderFighterSelect() {
   fighterDescription.textContent = state.mode === "boot" ? "Insert coin(s) · Push Enter" : state.mode === "character" ? "Clasificación de los repositorios · Esc vuelve al inicio" : state.mode === "project" ? `${project.description} · Esc vuelve a Select Stage` : `${category.description} · Esc vuelve a Character Select`;
   if (menuLabel) menuLabel.textContent = state.mode === "boot" ? "Insert coin" : state.mode === "character" ? "Character select" : state.mode === "project" ? "Repo card" : "Stage select";
 
+  if (state.mode === "stage") {
+    const stageImage = getProjectImage(project, category);
+    fighterRoster.innerHTML = `
+      <article class="stage-select-card" style="--accent: ${category.color}; --panel-image: url(${stageImage})">
+        <div class="stage-select-card__panel stage-select-card__panel--title">
+          <span>Select Stage</span>
+          <strong>${String(state.currentProjectIndex + 1).padStart(2, "0")} / ${String(category.projects.length).padStart(2, "0")}</strong>
+        </div>
+        <div class="stage-select-card__middle">
+          <button class="carousel-arrow carousel-arrow--prev" data-stage-direction="-1" type="button" aria-label="Stage anterior">‹</button>
+          <div class="stage-select-card__panel stage-select-card__panel--character">
+            <img src="${stageImage}" alt="Vista previa de ${project.name}" loading="lazy">
+            <h3>${project.name}</h3>
+          </div>
+          <button class="carousel-arrow carousel-arrow--next" data-stage-direction="1" type="button" aria-label="Stage siguiente">›</button>
+        </div>
+        <div class="stage-select-card__panel stage-select-card__panel--description">
+          <p>${project.description}</p>
+        </div>
+      </article>
+    `;
+    return;
+  }
+
   if (state.mode === "character") {
     const previousIndex = (state.currentCategoryIndex - 1 + categoryKeys.length) % categoryKeys.length;
     const nextIndex = (state.currentCategoryIndex + 1) % categoryKeys.length;
@@ -212,7 +240,7 @@ function renderStageMap() {
   const items = isStageLike ? getCurrentCategory().projects.map((project, index) => ({ ...project, category: state.currentCategory, index })) : getAllProjects();
   const positions = [[10, 18], [58, 14], [24, 38], [72, 42], [14, 67], [50, 70], [78, 75]];
 
-  stageMap.style.setProperty("--stage-image", `url(${isStageLike ? getCurrentCategory().image : "portada.png"})`);
+  stageMap.style.setProperty("--stage-image", `url(${isStageLike ? getProjectImage(getCurrentProject(), getCurrentCategory()) : "portada.png"})`);
 
   stageMap.innerHTML = items.map((project, index) => {
     const [left, top] = positions[index % positions.length];
@@ -307,6 +335,13 @@ categoryButtons.forEach((button) => {
 });
 
 fighterRoster.addEventListener("click", (event) => {
+  const stageArrow = event.target.closest("[data-stage-direction]");
+  if (stageArrow && state.mode === "stage") {
+    startBackgroundMusic();
+    changeProjectByOffset(Number(stageArrow.dataset.stageDirection));
+    return;
+  }
+
   const card = event.target.closest("[data-category], [data-project-index]");
   if (!card) return;
   startBackgroundMusic();
@@ -330,15 +365,17 @@ stageMap.addEventListener("click", (event) => {
 });
 
 characterPrev?.addEventListener("click", () => {
-  if (state.mode !== "character") return;
+  if (state.mode !== "character" && state.mode !== "stage") return;
   startBackgroundMusic();
-  changeCategoryByOffset(-1);
+  if (state.mode === "character") changeCategoryByOffset(-1);
+  else changeProjectByOffset(-1);
 });
 
 characterNext?.addEventListener("click", () => {
-  if (state.mode !== "character") return;
+  if (state.mode !== "character" && state.mode !== "stage") return;
   startBackgroundMusic();
-  changeCategoryByOffset(1);
+  if (state.mode === "character") changeCategoryByOffset(1);
+  else changeProjectByOffset(1);
 });
 
 musicToggle?.addEventListener("click", toggleBackgroundMusic);
