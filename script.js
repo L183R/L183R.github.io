@@ -15,7 +15,7 @@ const projectCategories = {
       { name: "csv_to_hash_sha256_comparator", image: "csv_to_hash_sha256_comparator.png", description: "Utilidad para comparar hashes SHA-256 desde CSV y detectar coincidencias o cambios sospechosos." },
       { name: "PowPowerCrawler", image: "PowPowerCrawler.png", description: "Crawler experimental para rastrear objetivos, recolectar datos y preparar reconocimiento técnico." },
       { name: "Password-manager", image: "Password-manager.png", description: "Gestor de contraseñas pensado como caja fuerte personal para credenciales y secretos." },
-      { name: "Buscador", description: "Buscador práctico para filtrar información y acelerar revisiones dentro de conjuntos de datos." }
+      { name: "Buscador", image: "buscador.png", description: "Buscador práctico para filtrar información y acelerar revisiones dentro de conjuntos de datos." }
     ]
   },
   juegos: {
@@ -41,7 +41,7 @@ const projectCategories = {
     color: "#7ee7ff",
     projects: [
       { name: "L183R.github.io", image: "entrenamiento.png", description: "Portafolio arcade retro para navegar mis repositorios como una pantalla de selección." },
-      { name: "CTF2025", image: "entrenamiento.png", description: "Entrenamiento CTF para practicar retos, documentar aprendizaje y fortalecer habilidades de seguridad." }
+      { name: "CTF2025", image: "CTF_2025.png", description: "Entrenamiento CTF para practicar retos, documentar aprendizaje y fortalecer habilidades de seguridad." }
     ]
   }
 };
