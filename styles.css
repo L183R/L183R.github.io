@@ -68,7 +68,6 @@ body::before {
 }
 
 .hero__copy-block,
-.stage-panel,
 .fighter-select {
   border: 4px solid #08050d;
   background: linear-gradient(180deg, var(--brick-light), var(--brick));
@@ -101,9 +100,7 @@ h1 {
 h2 { font-size: clamp(1.2rem, 3vw, 2.1rem); line-height: 1.2; text-shadow: 4px 4px 0 #000; }
 h3 { font-size: 1rem; line-height: 1.35; }
 
-.hero__copy,
-.stage-panel__heading p,
-.stage-card p {
+.hero__copy {
   color: var(--cream);
   font-family: "Courier New", ui-monospace, monospace;
   font-size: 1.05rem;
@@ -268,46 +265,6 @@ h3 { font-size: 1rem; line-height: 1.35; }
 .arcade-button--yellow { background: var(--yellow); }
 .arcade-button--blue { background: var(--blue); }
 
-.stage-panel { margin-bottom: 24px; padding: 24px; }
-.stage-panel__heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
-.stage-panel__heading p { max-width: 360px; margin: 0; }
-.stage-panel__heading strong { color: var(--yellow); font-size: 1.6rem; }
-
-.category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-
-.stage-card {
-  position: relative;
-  min-height: 335px;
-  border: 4px solid #050308;
-  padding: 18px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent), #050308 34%), #160f24 72%);
-  box-shadow: 6px 6px 0 #050308;
-  cursor: pointer;
-  overflow: hidden;
-  transition: transform 120ms ease, box-shadow 120ms ease;
-}
-
-.stage-card::before {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background: linear-gradient(135deg, rgba(255,255,255,.16) 0 12%, transparent 12% 100%);
-  pointer-events: none;
-}
-
-.stage-card:hover,
-.stage-card:focus-visible,
-.stage-card.is-active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #050308; outline: 0; }
-.stage-card__top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
-.stage-card__badge { display: grid; place-items: center; width: 56px; height: 56px; border: 4px solid #050308; color: #050308; background: var(--yellow); font-size: 1.4rem; }
-.stage-card__count { color: var(--yellow); font-size: 1.15rem; text-shadow: 3px 3px 0 #000; }
-.stage-card p { min-height: 92px; margin: 14px 0; }
-.stage-card ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
-.stage-card li, .stage-card a { color: var(--white); text-decoration: none; }
-.stage-card li { border: 3px solid #050308; padding: 10px; background: rgba(0, 0, 0, 0.3); font-size: 0.68rem; line-height: 1.45; }
-.stage-card a:hover { color: var(--yellow); }
-.empty-slot { color: var(--muted); border-style: dashed; }
-
 .fighter-select { overflow: hidden; }
 .fighter-select__hud { display: flex; justify-content: space-between; gap: 16px; border-bottom: 4px solid #050308; padding: 14px 18px; color: var(--yellow); background: #050308; font-size: 0.72rem; }
 .lives { color: var(--red); letter-spacing: 0.3em; }
@@ -344,14 +301,13 @@ h3 { font-size: 1rem; line-height: 1.35; }
 }
 
 @media (max-width: 980px) {
-  .hero, .category-grid { grid-template-columns: 1fr; }
+  .hero { grid-template-columns: 1fr; }
   .cabinet { max-width: 520px; margin-inline: auto; }
 }
 
 @media (max-width: 700px) {
   .arcade-page { width: min(100% - 18px, 1180px); padding-top: 18px; }
-  .stage-panel__heading { align-items: stretch; flex-direction: column; }
   .map-node span { display: none; }
   .cabinet__screen { min-height: 290px; }
-  .hero__copy, .stage-panel__heading p, .stage-card p { font-size: 0.95rem; }
+  .hero__copy { font-size: 0.95rem; }
 }

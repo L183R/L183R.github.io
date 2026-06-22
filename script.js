@@ -36,9 +36,7 @@ const state = {
 const categoryKeys = Object.keys(projectCategories);
 const categoryButtons = document.querySelectorAll(".coin-button");
 const stageMap = document.querySelector("#stage-map");
-const categoryGrid = document.querySelector("#category-grid");
 const totalCounter = document.querySelector("#total-counter");
-const categoryCounter = document.querySelector("#category-counter");
 const fighterStage = document.querySelector("#fighter-stage");
 const fighterTitle = document.querySelector("#fighter-title");
 const fighterDescription = document.querySelector("#fighter-description");
@@ -119,43 +117,6 @@ function changeCategory(categoryKey, { focusMenu = false, scrollToFighter = fals
 function changeCategoryByOffset(offset) {
   const nextIndex = (state.currentCategoryIndex + offset + categoryKeys.length) % categoryKeys.length;
   changeCategory(categoryKeys[nextIndex], { focusMenu: true, scrollToFighter: true });
-}
-
-function renderCategoryGrid() {
-  categoryGrid.innerHTML = Object.entries(projectCategories).map(([key, category]) => {
-    const projectList = category.projects.length
-      ? category.projects.map((project) => `<li><a href="${getProjectUrl(project)}" target="_blank" rel="noopener noreferrer">${project}</a></li>`).join("")
-      : `<li class="empty-slot">Bonus bloqueado · esperando práctica</li>`;
-
-    return `
-      <article class="stage-card" data-category="${key}" style="--accent: ${category.color}" tabindex="0" role="button" aria-label="Seleccionar ${category.name}">
-        <div class="stage-card__top">
-          <span class="stage-card__badge">${category.icon}</span>
-          <span class="stage-card__count">${category.stage} · ${category.projects.length.toString().padStart(2, "0")}</span>
-        </div>
-        <h3>${category.name}</h3>
-        <p>${category.description}</p>
-        <ul>${projectList}</ul>
-      </article>
-    `;
-  }).join("");
-
-  categoryGrid.querySelectorAll(".stage-card").forEach((card) => {
-    const selectCard = () => {
-      startBackgroundMusic();
-      changeCategory(card.dataset.category, { scrollToFighter: true });
-    };
-    card.addEventListener("click", (event) => {
-      if (event.target.closest("a")) return;
-      selectCard();
-    });
-    card.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        selectCard();
-      }
-    });
-  });
 }
 
 function renderStageMap() {
@@ -239,7 +200,7 @@ function handleKeyboardNavigation(event) {
     return;
   }
 
-  document.querySelector(".stage-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" });
   focusCategoryButton();
 }
 
@@ -256,7 +217,5 @@ document.addEventListener("keydown", handleKeyboardNavigation);
 window.addEventListener("load", attemptAutoplay, { once: true });
 
 totalCounter.textContent = getTotalProjects().toString().padStart(2, "0");
-categoryCounter.textContent = Object.keys(projectCategories).length.toString().padStart(2, "0");
-renderCategoryGrid();
 renderStageMap();
 changeCategory(state.currentCategory);
