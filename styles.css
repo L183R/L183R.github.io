@@ -113,11 +113,26 @@ h3 { font-size: 1rem; line-height: 1.35; }
 
 .hero__copy { max-width: 740px; margin: 24px 0; }
 
+.control-hint {
+  display: inline-block;
+  margin: 18px 0 0;
+  border: 3px solid #050308;
+  padding: 12px;
+  color: var(--yellow);
+  background: rgba(5, 3, 8, 0.48);
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.45;
+  text-shadow: 2px 2px 0 #000;
+}
+
 .hero__actions,
 .category-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
 
 .coin-button,
-.stage-button {
+.stage-button,
+.music-button {
   border: 4px solid #050308;
   padding: 0.82rem 1rem;
   color: #050308;
@@ -132,9 +147,13 @@ h3 { font-size: 1rem; line-height: 1.35; }
 
 .coin-button:hover,
 .coin-button:focus-visible,
+.coin-button.is-active,
 .stage-button:hover,
 .stage-button:focus-visible,
-.stage-button.is-active {
+.stage-button.is-active,
+.music-button:hover,
+.music-button:focus-visible,
+.music-button.is-playing {
   background: var(--green);
   transform: translate(3px, 3px);
   box-shadow: 2px 2px 0 #050308;
@@ -277,7 +296,8 @@ h3 { font-size: 1rem; line-height: 1.35; }
 }
 
 .stage-card:hover,
-.stage-card.is-active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #050308; }
+.stage-card:focus-visible,
+.stage-card.is-active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #050308; outline: 0; }
 .stage-card__top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
 .stage-card__badge { display: grid; place-items: center; width: 56px; height: 56px; border: 4px solid #050308; color: #050308; background: var(--yellow); font-size: 1.4rem; }
 .stage-card__count { color: var(--yellow); font-size: 1.15rem; text-shadow: 3px 3px 0 #000; }

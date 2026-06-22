@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <audio id="background-music" src="Cuatro Sombras Verdes.mp3" preload="auto" loop></audio>
   <main class="arcade-page">
     <section class="hero" aria-labelledby="page-title">
       <div class="hero__copy-block">
@@ -21,7 +22,9 @@
           <button class="coin-button" type="button" data-category="ciberseguridad">1P Seguridad</button>
           <button class="coin-button" type="button" data-category="juegos">2P Juegos</button>
           <button class="coin-button" type="button" data-category="aprendizaje">Bonus Entreno</button>
+          <button class="music-button" id="music-toggle" type="button" aria-pressed="false">♫ Activar música</button>
         </div>
+        <p class="control-hint">Usa A/D o ←/→ para cambiar de zona. Usa W/S o ↑/↓ para moverte por el menú.</p>
       </div>
 
       <aside class="cabinet" aria-label="Gabinete arcade con contador de repositorios">
