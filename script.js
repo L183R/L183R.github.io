@@ -68,6 +68,7 @@ const arcadeStatus = document.querySelector("#arcade-status");
 const screenTitle = document.querySelector("#screen-title");
 const screenSubtitle = document.querySelector("#screen-subtitle");
 const screenPrompt = document.querySelector("#screen-prompt");
+const screenCopyright = document.querySelector("#screen-copyright");
 const menuLabel = document.querySelector("#menu-label");
 
 backgroundMusic?.setAttribute("src", BACKGROUND_MUSIC);
@@ -113,9 +114,9 @@ function renderArcadeScreen() {
 
   document.body.dataset.screen = state.mode;
   arcadeStatus.textContent = isBoot ? "CREDITS 0" : "CREDITS 1";
-  screenTitle.textContent = isBoot ? getAllProjects().map(({ name }) => name).join(" · ") : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
+  screenTitle.textContent = isBoot ? "L183R" : isCharacter ? "Select Character" : isStage ? "Select Stage" : project.name;
   screenSubtitle.textContent = isBoot
-    ? "Insert coin(s)"
+    ? "The Repo Warrior"
     : isCharacter
       ? "Clasificaciones de repos"
       : isStage
@@ -128,6 +129,8 @@ function renderArcadeScreen() {
       : isStage
         ? "←/→ elige repo · Enter abre ficha"
         : "Enter abre GitHub · Escape vuelve a Select Stage";
+
+  if (screenCopyright) screenCopyright.hidden = !isBoot;
 
   renderStageMap();
   renderFighterSelect();
