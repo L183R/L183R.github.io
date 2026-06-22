@@ -15,7 +15,7 @@
         <h1 id="page-title">Elige una zona y entra al gabinete de proyectos</h1>
         <p class="hero__copy">
           Una pantalla pixelada organiza mis repositorios como fases de acción: seguridad,
-          juegos y entrenamiento. Pulsa un cartucho, lee la marquesina o usa comandos rápidos.
+          juegos y entrenamiento. Pulsa un cartucho para cambiar el roster del escenario.
         </p>
         <div class="hero__actions" aria-label="Controles principales">
           <button class="coin-button" type="button" data-category="ciberseguridad">1P Seguridad</button>
@@ -62,22 +62,30 @@
       <div id="category-grid" class="category-grid"></div>
     </section>
 
-    <section class="command-deck" aria-label="Panel interactivo de comandos">
-      <div class="command-deck__header">
-        <span>CRT COMMAND DECK</span>
+    <section class="fighter-select" aria-labelledby="fighter-title">
+      <div class="fighter-select__hud">
+        <span id="fighter-stage">Zona 01</span>
         <span class="lives" aria-label="vidas decorativas">♥ ♥ ♥</span>
       </div>
-      <div id="terminal-output" class="terminal-output" role="log" aria-live="polite"></div>
-      <form id="terminal-form" class="terminal-input" autocomplete="off">
-        <label for="terminal-command" class="prompt">PLAYER@L183R:~&gt;</label>
-        <input id="terminal-command" name="command" type="text" spellcheck="false" aria-label="Escribe un comando" placeholder="stage juegos" />
-      </form>
+      <div class="fighter-select__screen">
+        <div class="beat-stage" aria-hidden="true">
+          <span class="beat-stage__moon"></span>
+          <span class="beat-stage__sign">SELECT YOUR REPO</span>
+          <span class="beat-stage__skyline beat-stage__skyline--one"></span>
+          <span class="beat-stage__skyline beat-stage__skyline--two"></span>
+          <span class="beat-stage__floor"></span>
+          <span class="beat-stage__hero beat-stage__hero--left"></span>
+          <span class="beat-stage__hero beat-stage__hero--right"></span>
+        </div>
+        <div class="fighter-select__content">
+          <p class="eyebrow">character select</p>
+          <h2 id="fighter-title">Elige repositorio</h2>
+          <p id="fighter-description" class="fighter-select__description"></p>
+          <div id="fighter-roster" class="fighter-roster"></div>
+        </div>
+      </div>
     </section>
   </main>
-
-  <template id="line-template">
-    <div class="terminal-line"></div>
-  </template>
 
   <script src="script.js"></script>
 </body>

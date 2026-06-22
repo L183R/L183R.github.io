@@ -33,45 +33,22 @@ const projectCategories = {
   }
 };
 
-const categoryAliases = {
-  cyber: "ciberseguridad",
-  ciber: "ciberseguridad",
-  seguridad: "ciberseguridad",
-  games: "juegos",
-  game: "juegos",
-  aprendizaje: "aprendizaje",
-  learn: "aprendizaje",
-  learning: "aprendizaje"
-};
-
 const state = {
-  currentCategory: null,
-  currentPath: "~",
-  history: [],
-  historyIndex: -1
+  currentCategory: "ciberseguridad"
 };
 
-const output = document.querySelector("#terminal-output");
-const form = document.querySelector("#terminal-form");
-const input = document.querySelector("#terminal-command");
-const lineTemplate = document.querySelector("#line-template");
 const categoryButtons = document.querySelectorAll(".coin-button");
 const stageMap = document.querySelector("#stage-map");
 const categoryGrid = document.querySelector("#category-grid");
 const totalCounter = document.querySelector("#total-counter");
 const categoryCounter = document.querySelector("#category-counter");
-
-function normalize(text = "") {
-  return text.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
+const fighterStage = document.querySelector("#fighter-stage");
+const fighterTitle = document.querySelector("#fighter-title");
+const fighterDescription = document.querySelector("#fighter-description");
+const fighterRoster = document.querySelector("#fighter-roster");
 
 function getTotalProjects() {
   return Object.values(projectCategories).reduce((total, category) => total + category.projects.length, 0);
-}
-
-function resolveCategory(category) {
-  const normalized = normalize(category);
-  return projectCategories[normalized] ? normalized : categoryAliases[normalized];
 }
 
 function getProjectUrl(projectName) {
@@ -84,158 +61,39 @@ function getAllProjects() {
   );
 }
 
-function addLine(text = "", variant = "") {
-  const line = lineTemplate.content.firstElementChild.cloneNode(true);
-  line.textContent = text;
-  if (variant) {
-    line.classList.add(`terminal-line--${variant}`);
-  }
-  output.appendChild(line);
-  output.scrollTop = output.scrollHeight;
-}
-
-function addCommand(command) {
-  addLine(`${GITHUB_USER}@github:${state.currentPath}$ ${command}`, "command");
-}
-
-function printWelcome() {
-  addLine("Gabinete encendido. Créditos: 01", "success");
-  addLine("Fases cargadas: ciberseguridad · juegos · aprendizaje", "muted");
-  addLine("Escribe 'help', 'stage <zona>' o pulsa un cartucho para desplegar repos.");
-  addLine();
-}
-
-function printHelp() {
-  addLine("Comandos disponibles:", "success");
-  addLine("  help                         Muestra esta ayuda");
-  addLine("  ls                           Lista categorías o proyectos");
-  addLine("  cd/stage <categoria>         Entra en ciberseguridad, juegos o aprendizaje");
-  addLine("  cat <proyecto>               Muestra detalles del proyecto");
-  addLine("  open <proyecto>              Abre el repositorio en GitHub");
-  addLine("  pwd                          Muestra la ruta actual");
-  addLine("  clear                        Limpia la terminal");
-  addLine("  home                         Vuelve al mapa principal");
-}
-
-function printCategories() {
-  addLine("Pantalla de selección:", "success");
-  Object.entries(projectCategories).forEach(([key, category]) => {
-    addLine(`  ${category.stage.padEnd(8)} ${key.padEnd(16)} ${String(category.projects.length).padStart(2, "0")} repo(s)`);
-  });
-}
-
-function printProjects(categoryKey = state.currentCategory) {
-  const category = projectCategories[categoryKey];
-  if (!category.projects.length) {
-    addLine(`${category.name} no tiene cartucho insertado todavía: bonus listo para futuro entrenamiento.`, "muted");
-    return;
-  }
-
-  category.projects.forEach((project, index) => {
-    addLine(`  ${(index + 1).toString().padStart(2, "0")}  ${project}  →  ${getProjectUrl(project)}`, "repo");
-  });
-}
-
-function findProject(projectName) {
-  const target = normalize(projectName);
-  return getAllProjects().find((project) => normalize(project.name) === target || normalize(project.name).includes(target));
-}
-
-function printProjectDetails(projectName) {
-  const project = findProject(projectName);
-  if (!project) {
-    addLine(`Proyecto no encontrado: ${projectName}`, "error");
-    return;
-  }
-
-  addLine(project.name, "repo");
-  addLine(`  Categoría: ${project.categoryName}`);
-  addLine(`  Estado: cartucho validado`);
-  addLine(`  URL: ${getProjectUrl(project.name)}`);
-}
-
 function setActiveCategory(categoryKey) {
   document.querySelectorAll("[data-category]").forEach((element) => {
     element.classList.toggle("is-active", element.dataset.category === categoryKey);
   });
 }
 
-function changeCategory(category) {
-  const categoryKey = resolveCategory(category);
-  if (!categoryKey) {
-    addLine(`Categoría desconocida: ${category}`, "error");
-    addLine(`Usa: ${Object.keys(projectCategories).join(", ")}`, "muted");
-    return;
-  }
+function renderFighterSelect(categoryKey = state.currentCategory) {
+  const category = projectCategories[categoryKey];
+  fighterStage.textContent = `${category.stage} · ${category.name}`;
+  fighterTitle.textContent = `Elige ${category.name}`;
+  fighterDescription.textContent = category.description;
 
+  fighterRoster.innerHTML = category.projects.length
+    ? category.projects.map((project, index) => `
+      <a class="fighter-card" href="${getProjectUrl(project)}" target="_blank" rel="noopener noreferrer" style="--accent: ${category.color}">
+        <span class="fighter-card__sprite">${index + 1}</span>
+        <h3>${project}</h3>
+        <p>Jugador listo · abrir repo en GitHub</p>
+      </a>
+    `).join("")
+    : `
+      <article class="fighter-card fighter-card--empty" style="--accent: ${category.color}">
+        <span class="fighter-card__sprite">?</span>
+        <h3>Bonus bloqueado</h3>
+        <p>Ranura reservada para futuras prácticas y rutas de entrenamiento.</p>
+      </article>
+    `;
+}
+
+function changeCategory(categoryKey) {
   state.currentCategory = categoryKey;
-  state.currentPath = `~/${categoryKey}`;
   setActiveCategory(categoryKey);
-  addLine(`Entrando a ${state.currentPath}. Preparado para combate de código.`, "success");
-  printProjects(categoryKey);
-}
-
-function goHome() {
-  state.currentCategory = null;
-  state.currentPath = "~";
-  setActiveCategory(null);
-  addLine("Volviendo a la pantalla de selección.", "success");
-  printCategories();
-}
-
-function openProject(projectName) {
-  const project = findProject(projectName);
-  if (!project) {
-    addLine(`Proyecto no encontrado: ${projectName}`, "error");
-    return;
-  }
-
-  addLine(`Abriendo ${getProjectUrl(project.name)}`, "success");
-  window.open(getProjectUrl(project.name), "_blank", "noopener,noreferrer");
-}
-
-function execute(command) {
-  const trimmed = command.trim();
-  if (!trimmed) return;
-
-  addCommand(trimmed);
-  const [rawAction, ...args] = trimmed.split(/\s+/);
-  const action = normalize(rawAction);
-  const argument = args.join(" ");
-
-  switch (action) {
-    case "help":
-    case "ayuda":
-      printHelp();
-      break;
-    case "ls":
-      state.currentCategory ? printProjects() : printCategories();
-      break;
-    case "cd":
-    case "stage":
-    case "fase":
-      if (!argument || argument === "~" || argument === "..") goHome();
-      else changeCategory(argument);
-      break;
-    case "cat":
-      argument ? printProjectDetails(argument) : addLine("Uso: cat <proyecto>", "error");
-      break;
-    case "open":
-      argument ? openProject(argument) : addLine("Uso: open <proyecto>", "error");
-      break;
-    case "pwd":
-      addLine(state.currentPath);
-      break;
-    case "clear":
-      output.textContent = "";
-      break;
-    case "home":
-      goHome();
-      break;
-    default:
-      addLine(`Comando no encontrado: ${rawAction}`, "error");
-      addLine("Prueba con 'help'.", "muted");
-  }
+  renderFighterSelect(categoryKey);
 }
 
 function renderCategoryGrid() {
@@ -260,9 +118,8 @@ function renderCategoryGrid() {
   categoryGrid.querySelectorAll(".stage-card").forEach((card) => {
     card.addEventListener("click", (event) => {
       if (event.target.closest("a")) return;
-      addCommand(`stage ${card.dataset.category}`);
       changeCategory(card.dataset.category);
-      input.focus();
+      document.querySelector(".fighter-select").scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }
@@ -279,42 +136,16 @@ function renderStageMap() {
   }).join("");
 }
 
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const command = input.value;
-  state.history.push(command);
-  state.historyIndex = state.history.length;
-  input.value = "";
-  execute(command);
-});
-
-input.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowUp") {
-    event.preventDefault();
-    state.historyIndex = Math.max(0, state.historyIndex - 1);
-    input.value = state.history[state.historyIndex] || "";
-  }
-
-  if (event.key === "ArrowDown") {
-    event.preventDefault();
-    state.historyIndex = Math.min(state.history.length, state.historyIndex + 1);
-    input.value = state.history[state.historyIndex] || "";
-  }
-});
-
 categoryButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    const category = button.dataset.category;
-    addCommand(`stage ${category}`);
-    changeCategory(category);
-    input.focus();
+    changeCategory(button.dataset.category);
+    document.querySelector(".fighter-select").scrollIntoView({ behavior: "smooth", block: "start" });
   });
 });
+
 
 totalCounter.textContent = getTotalProjects().toString().padStart(2, "0");
 categoryCounter.textContent = Object.keys(projectCategories).length.toString().padStart(2, "0");
 renderCategoryGrid();
 renderStageMap();
-printWelcome();
-printCategories();
-input.focus();
+changeCategory(state.currentCategory);
