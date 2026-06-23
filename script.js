@@ -1,6 +1,29 @@
 const GITHUB_USER = "L183R";
 const BACKGROUND_MUSIC = "Cuatro Sombras Verdes.mp3";
 const MUSIC_PREFERENCE_KEY = "repo-arcade-music-enabled";
+const SOUND_VOLUME = 0.28;
+
+const arcadeSoundProfiles = {
+  select: {
+    type: "square",
+    notes: [
+      { frequency: 523.25, start: 0, duration: 0.055, gain: 0.88 },
+      { frequency: 783.99, start: 0.052, duration: 0.07, gain: 0.74 },
+      { frequency: 1046.5, start: 0.112, duration: 0.105, gain: 0.64 }
+    ],
+    noise: { start: 0, duration: 0.08, gain: 0.08, filterFrequency: 1800 },
+    endDelay: 0.24
+  },
+  change: {
+    type: "square",
+    notes: [
+      { frequency: 392, start: 0, duration: 0.045, gain: 0.54 },
+      { frequency: 587.33, start: 0.038, duration: 0.055, gain: 0.46 }
+    ],
+    noise: { start: 0, duration: 0.035, gain: 0.05, filterFrequency: 2400 },
+    endDelay: 0.12
+  }
+};
 
 const projectCategories = {
   ciberseguridad: {
@@ -53,7 +76,8 @@ const state = {
   currentProjectIndex: 0,
   musicReady: false,
   autoplayAttempted: false,
-  musicEnabled: getStoredMusicPreference()
+  musicEnabled: getStoredMusicPreference(),
+  audioContext: null
 };
 
 const categoryKeys = ["entrenamiento", "ciberseguridad", "juegos"];
@@ -81,6 +105,75 @@ const screenCopyright = document.querySelector("#screen-copyright");
 const menuLabel = document.querySelector("#menu-label");
 
 backgroundMusic?.setAttribute("src", BACKGROUND_MUSIC);
+
+function getAudioContext() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return null;
+  if (!state.audioContext) state.audioContext = new AudioContext();
+  if (state.audioContext.state === "suspended") state.audioContext.resume();
+  return state.audioContext;
+}
+
+function createNoiseBuffer(audioContext, duration) {
+  const buffer = audioContext.createBuffer(1, Math.max(1, audioContext.sampleRate * duration), audioContext.sampleRate);
+  const channel = buffer.getChannelData(0);
+  for (let index = 0; index < channel.length; index += 1) {
+    channel[index] = Math.random() * 2 - 1;
+  }
+  return buffer;
+}
+
+function playArcadeSound(soundName) {
+  const profile = arcadeSoundProfiles[soundName];
+  const audioContext = getAudioContext();
+  if (!profile || !audioContext) return;
+
+  const masterGain = audioContext.createGain();
+  masterGain.gain.setValueAtTime(SOUND_VOLUME, audioContext.currentTime);
+  masterGain.connect(audioContext.destination);
+
+  profile.notes.forEach((note) => {
+    const oscillator = audioContext.createOscillator();
+    const noteGain = audioContext.createGain();
+    const startTime = audioContext.currentTime + note.start;
+    const endTime = startTime + note.duration;
+
+    oscillator.type = profile.type;
+    oscillator.frequency.setValueAtTime(note.frequency, startTime);
+    oscillator.frequency.exponentialRampToValueAtTime(note.frequency * 0.985, endTime);
+    noteGain.gain.setValueAtTime(0.0001, startTime);
+    noteGain.gain.exponentialRampToValueAtTime(note.gain, startTime + 0.008);
+    noteGain.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+    oscillator.connect(noteGain);
+    noteGain.connect(masterGain);
+    oscillator.start(startTime);
+    oscillator.stop(endTime + 0.015);
+  });
+
+  if (profile.noise) {
+    const noiseSource = audioContext.createBufferSource();
+    const noiseGain = audioContext.createGain();
+    const noiseFilter = audioContext.createBiquadFilter();
+    const startTime = audioContext.currentTime + profile.noise.start;
+    const endTime = startTime + profile.noise.duration;
+
+    noiseSource.buffer = createNoiseBuffer(audioContext, profile.noise.duration);
+    noiseFilter.type = "bandpass";
+    noiseFilter.frequency.setValueAtTime(profile.noise.filterFrequency, startTime);
+    noiseFilter.Q.setValueAtTime(6, startTime);
+    noiseGain.gain.setValueAtTime(profile.noise.gain, startTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+    noiseSource.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+    noiseSource.start(startTime);
+    noiseSource.stop(endTime);
+  }
+
+  setTimeout(() => masterGain.disconnect(), profile.endDelay * 1000);
+}
 
 function getStoredMusicPreference() {
   return localStorage.getItem(MUSIC_PREFERENCE_KEY) !== "false";
@@ -238,7 +331,8 @@ function renderFighterSelect() {
   updateRosterCarousel();
 }
 
-function changeCategory(categoryKey) {
+function changeCategory(categoryKey, { sound = true } = {}) {
+  if (sound) playArcadeSound("change");
   state.currentCategory = categoryKey;
   state.currentCategoryIndex = categoryKeys.indexOf(categoryKey);
   state.currentProjectIndex = 0;
@@ -251,6 +345,7 @@ function changeCategoryByOffset(offset) {
 }
 
 function changeProjectByOffset(offset) {
+  playArcadeSound("change");
   const projects = getCurrentCategory().projects;
   state.currentProjectIndex = (state.currentProjectIndex + offset + projects.length) % projects.length;
   renderArcadeScreen();
@@ -305,6 +400,7 @@ function toggleBackgroundMusic() {
 }
 
 function confirmSelection() {
+  playArcadeSound("select");
   startBackgroundMusic();
   if (state.mode === "boot") state.mode = "character";
   else if (state.mode === "character") state.mode = "stage";
@@ -346,9 +442,10 @@ function handleKeyboardNavigation(event) {
 categoryButtons.forEach((button) => {
   button.setAttribute("aria-pressed", "false");
   button.addEventListener("click", () => {
+    playArcadeSound("select");
     startBackgroundMusic();
     state.mode = "stage";
-    changeCategory(button.dataset.category);
+    changeCategory(button.dataset.category, { sound: false });
   });
 });
 
@@ -362,10 +459,11 @@ fighterRoster.addEventListener("click", (event) => {
 
   const card = event.target.closest("[data-category], [data-project-index]");
   if (!card) return;
+  playArcadeSound("select");
   startBackgroundMusic();
   if (card.dataset.category) {
     state.mode = "stage";
-    changeCategory(card.dataset.category);
+    changeCategory(card.dataset.category, { sound: false });
     return;
   }
   state.currentProjectIndex = Number(card.dataset.projectIndex);
@@ -381,6 +479,7 @@ fighterRoster.addEventListener("click", (event) => {
 stageMap.addEventListener("click", (event) => {
   const node = event.target.closest("[data-project-index]");
   if (!node || state.mode === "boot" || state.mode === "character") return;
+  playArcadeSound("select");
   startBackgroundMusic();
   state.currentProjectIndex = Number(node.dataset.projectIndex);
   if (state.mode === "stage") {
